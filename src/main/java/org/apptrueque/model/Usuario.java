@@ -1,6 +1,7 @@
 package org.apptrueque.model;
 
 import jakarta.persistence.*;
+import org.apptrueque.util.JpaUtil;
 
 import java.util.Date;
 
@@ -25,12 +26,10 @@ public class Usuario {
     @Column(nullable = false)
     private Date fechaRegistro;
 
-    // Constructor vacío (necesario para JPA)
     public Usuario() {
         this.fechaRegistro = new Date();
     }
 
-    // Constructor con parámetros
     public Usuario(String cedula, String nombre, String email, String password) {
         this.cedula = cedula;
         this.nombre = nombre;
@@ -38,28 +37,47 @@ public class Usuario {
         this.password = password;
         this.fechaRegistro = new Date();
     }
-    public static Usuario obtenerPorEmail(String email) {
-        EntityManagerFactory emf = null;
-        EntityManager em = null;
-        Usuario usuario = null;
 
+    // ➡️ Método para registrar un usuario usando JpaUtil
+    public static void registrar(Usuario usuario) {
+        EntityManager em = null;
         try {
-            emf = Persistence.createEntityManagerFactory("apptruequePU");
-            em = emf.createEntityManager();
-            usuario = em.createQuery("SELECT u FROM Usuario u WHERE u.email = :email", Usuario.class)
-                    .setParameter("email", email)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            usuario = null;  // Si no se encuentra, el usuario es null
+            em = JpaUtil.getEntityManagerFactory().createEntityManager();
+            em.getTransaction().begin();
+            em.persist(usuario);
+            em.getTransaction().commit();
+            System.out.println("✅ Usuario registrado exitosamente: " + usuario.getNombre());
         } catch (Exception e) {
+            if (em != null && em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             e.printStackTrace();
-            System.out.println("Error al obtener el usuario.");
+            System.out.println("❌ Error al registrar el usuario.");
         } finally {
             if (em != null) {
                 em.close();
             }
-            if (emf != null) {
-                emf.close();
+        }
+    }
+
+    // ➡️ Método para obtener usuario por email usando JpaUtil
+    public static Usuario obtenerPorEmail(String email) {
+        EntityManager em = null;
+        Usuario usuario = null;
+        try {
+            em = JpaUtil.getEntityManagerFactory().createEntityManager();
+            usuario = em.createQuery(
+                            "SELECT u FROM Usuario u WHERE u.email = :email", Usuario.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            usuario = null;  // No encontró el usuario
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("❌ Error al buscar el usuario.");
+        } finally {
+            if (em != null) {
+                em.close();
             }
         }
         return usuario;
@@ -76,30 +94,4 @@ public class Usuario {
     public void setPassword(String password) { this.password = password; }
     public Date getFechaRegistro() { return fechaRegistro; }
     public void setFechaRegistro(Date fechaRegistro) { this.fechaRegistro = fechaRegistro; }
-    public static void registrar(Usuario usuario) {
-        EntityManagerFactory emf = null;
-        EntityManager em = null;
-        try {
-            emf = Persistence.createEntityManagerFactory("apptruequePU");
-            em = emf.createEntityManager();
-            em.getTransaction().begin();
-            em.persist(usuario);  // Persistimos el usuario en la base de datos
-            em.getTransaction().commit();
-            System.out.println("Usuario registrado exitosamente: " + usuario.getNombre());
-        } catch (Exception e) {
-            if (em != null && em.getTransaction().isActive()) {
-                em.getTransaction().rollback();  // Si hay un error, hacemos rollback
-            }
-            e.printStackTrace();
-            System.out.println("Error al registrar el usuario.");
-        } finally {
-            if (em != null) {
-                em.close();  // Cerramos el EntityManager
-            }
-            if (emf != null) {
-                emf.close();  // Cerramos el EntityManagerFactory
-            }
-        }
-    }
-
 }

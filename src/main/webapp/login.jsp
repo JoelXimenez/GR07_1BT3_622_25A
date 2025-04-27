@@ -108,7 +108,7 @@
         }
     %>
 
-    <a href="singup.jsp" class="link-volver">¿No tienes cuenta?, Regístrate</a>
+    <a href="signup.jsp" class="link-volver">¿No tienes cuenta?, Regístrate</a>
 </div>
 </body>
 </html>
