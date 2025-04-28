@@ -1,8 +1,6 @@
 package org.apptrueque.model;
 
 import jakarta.persistence.*;
-import org.apptrueque.util.JpaUtil;
-
 import java.util.Date;
 
 @Entity
@@ -26,23 +24,30 @@ public class Usuario {
     @Column(nullable = false)
     private Date fechaRegistro;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "closet_id", referencedColumnName = "id")
+    private Closet closetActual;
+
+    // Constructor vacío (requerido por JPA)
     public Usuario() {
         this.fechaRegistro = new Date();
     }
 
+    // Constructor con parámetros
     public Usuario(String cedula, String nombre, String email, String password) {
         this.cedula = cedula;
         this.nombre = nombre;
         this.email = email;
         this.password = password;
         this.fechaRegistro = new Date();
+        this.closetActual = new Closet(); // Al crear usuario, creamos su closet
     }
 
-    // ➡️ Método para registrar un usuario usando JpaUtil
+    // Método para registrar un nuevo usuario (guardar en base de datos)
     public static void registrar(Usuario usuario) {
         EntityManager em = null;
         try {
-            em = JpaUtil.getEntityManagerFactory().createEntityManager();
+            em = org.apptrueque.util.JpaUtil.getEntityManagerFactory().createEntityManager();
             em.getTransaction().begin();
             em.persist(usuario);
             em.getTransaction().commit();
@@ -60,21 +65,23 @@ public class Usuario {
         }
     }
 
-    // ➡️ Método para obtener usuario por email usando JpaUtil
+    // Método para buscar un usuario por su email
     public static Usuario obtenerPorEmail(String email) {
         EntityManager em = null;
         Usuario usuario = null;
         try {
-            em = JpaUtil.getEntityManagerFactory().createEntityManager();
+            em = org.apptrueque.util.JpaUtil.getEntityManagerFactory().createEntityManager();
             usuario = em.createQuery(
-                            "SELECT u FROM Usuario u WHERE u.email = :email", Usuario.class)
+                            "SELECT u FROM Usuario u " +
+                                    "LEFT JOIN FETCH u.closetActual c " +
+                                    "LEFT JOIN FETCH c.prendas " +
+                                    "WHERE u.email = :email", Usuario.class)
                     .setParameter("email", email)
                     .getSingleResult();
         } catch (NoResultException e) {
-            usuario = null;  // No encontró el usuario
+            usuario = null;
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("❌ Error al buscar el usuario.");
         } finally {
             if (em != null) {
                 em.close();
@@ -83,15 +90,55 @@ public class Usuario {
         return usuario;
     }
 
+
+    // Método para editar perfil (ej: actualizar nombre, email o password)
+    public void editarPerfil(String nuevoNombre, String nuevoEmail, String nuevaPassword) {
+        EntityManager em = null;
+        try {
+            em = org.apptrueque.util.JpaUtil.getEntityManagerFactory().createEntityManager();
+            em.getTransaction().begin();
+            this.nombre = nuevoNombre;
+            this.email = nuevoEmail;
+            this.password = nuevaPassword;
+            em.merge(this);
+            em.getTransaction().commit();
+            System.out.println("✅ Perfil actualizado correctamente");
+        } catch (Exception e) {
+            if (em != null && em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            e.printStackTrace();
+            System.out.println("❌ Error al actualizar el perfil.");
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
+
+    // Método para publicar closet del usuario
+    public void publicarCloset() {
+        if (closetActual != null) {
+            closetActual.publicar();
+        }
+    }
+
     // Getters y Setters
     public String getCedula() { return cedula; }
     public void setCedula(String cedula) { this.cedula = cedula; }
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
+
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
     public Date getFechaRegistro() { return fechaRegistro; }
     public void setFechaRegistro(Date fechaRegistro) { this.fechaRegistro = fechaRegistro; }
+
+    public Closet getClosetActual() { return closetActual; }
+    public void setClosetActual(Closet closetActual) { this.closetActual = closetActual; }
 }
