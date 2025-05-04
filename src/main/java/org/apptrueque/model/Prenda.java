@@ -29,13 +29,12 @@ public class Prenda {
     private String imagenURL;
 
     @ManyToOne
-    @JoinColumn(name = "closet_id")
+    @JoinColumn(name = "closet_id", referencedColumnName = "idCloset", nullable = false)
     private Closet closet;
 
-    // Constructor vacío (necesario para JPA)
-    public Prenda() {}
+    public Prenda() {
+    }
 
-    // Constructor para creación rápida
     public Prenda(String nombre, String descripcion, String talla, String estado, String categoria, String imagenURL) {
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -45,7 +44,6 @@ public class Prenda {
         this.imagenURL = imagenURL;
     }
 
-    // Métodos de negocio (opcional si quieres guardar desde el objeto mismo)
     public void guardar() {
         EntityManager em = null;
         try {
@@ -55,15 +53,11 @@ public class Prenda {
             em.getTransaction().commit();
             System.out.println("✅ Prenda guardada exitosamente: " + nombre);
         } catch (Exception e) {
-            if (em != null && em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
+            if (em != null && em.getTransaction().isActive()) em.getTransaction().rollback();
             e.printStackTrace();
             System.out.println("❌ Error al guardar la prenda.");
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            if (em != null) em.close();
         }
     }
 
@@ -76,15 +70,11 @@ public class Prenda {
             em.getTransaction().commit();
             System.out.println("✅ Prenda actualizada exitosamente: " + nombre);
         } catch (Exception e) {
-            if (em != null && em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
+            if (em != null && em.getTransaction().isActive()) em.getTransaction().rollback();
             e.printStackTrace();
             System.out.println("❌ Error al actualizar la prenda.");
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            if (em != null) em.close();
         }
     }
 
@@ -100,41 +90,77 @@ public class Prenda {
                 System.out.println("✅ Prenda eliminada exitosamente: " + nombre);
             }
         } catch (Exception e) {
-            if (em != null && em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
+            if (em != null && em.getTransaction().isActive()) em.getTransaction().rollback();
             e.printStackTrace();
             System.out.println("❌ Error al eliminar la prenda.");
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            if (em != null) em.close();
         }
     }
 
     // Getters y Setters
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public String getNombre() {
+        return nombre;
+    }
 
-    public String getTalla() { return talla; }
-    public void setTalla(String talla) { this.talla = talla; }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public String getDescripcion() {
+        return descripcion;
+    }
 
-    public String getCategoria() { return categoria; }
-    public void setCategoria(String categoria) { this.categoria = categoria; }
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
 
-    public String getImagenURL() { return imagenURL; }
-    public void setImagenURL(String imagenURL) { this.imagenURL = imagenURL; }
+    public String getTalla() {
+        return talla;
+    }
 
-    public Closet getCloset() { return closet; }
-    public void setCloset(Closet closet) { this.closet = closet; }
+    public void setTalla(String talla) {
+        this.talla = talla;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
+    public String getImagenURL() {
+        return imagenURL;
+    }
+
+    public void setImagenURL(String imagenURL) {
+        this.imagenURL = imagenURL;
+    }
+
+    public Closet getCloset() {
+        return closet;
+    }
+
+    public void setCloset(Closet closet) {
+        this.closet = closet;
+    }
 }

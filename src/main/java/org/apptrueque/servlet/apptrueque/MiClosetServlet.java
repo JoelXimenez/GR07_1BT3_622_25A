@@ -4,20 +4,19 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.EntityTransaction;
 import org.apptrueque.model.Usuario;
 import org.apptrueque.model.Closet;
-import org.apptrueque.model.Prenda;
 import org.apptrueque.util.JpaUtil;
 
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet(name = "MiClosetServlet", value = "/MiClosetServlet")
 public class MiClosetServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
 
@@ -26,51 +25,49 @@ public class MiClosetServlet extends HttpServlet {
             return;
         }
 
+        Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
         EntityManager em = JpaUtil.getEntityManagerFactory().createEntityManager();
+        EntityTransaction tx = em.getTransaction();
 
         try {
-            Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
+            // Traemos al usuario con su closet y prendas asociadas en una sola consulta
+            Usuario usuario = em.createQuery(
+                            "SELECT u FROM Usuario u " +
+                                    "LEFT JOIN FETCH u.closetActual c " +
+                                    "LEFT JOIN FETCH c.prendas " +
+                                    "WHERE u.cedula = :cedula", Usuario.class)
+                    .setParameter("cedula", usuarioSesion.getCedula())
+                    .getSingleResult();
 
-            Usuario usuarioBD = em.find(Usuario.class, usuarioSesion.getCedula());
+            Closet closet = usuario.getClosetActual();
 
-            if (usuarioBD != null) {
-                Closet closet = usuarioBD.getClosetActual();
+            // Si no tiene closet asociado, se crea uno nuevo
+            if (closet == null) {
+                tx.begin();
 
-                if (closet == null) {
-                    closet = new Closet();
-                    usuarioBD.setClosetActual(closet);
+                closet = new Closet();
+                em.persist(closet);
+                em.flush(); // Se asegura de que se genere el ID
 
-                    em.getTransaction().begin();
-                    em.persist(closet);
-                    em.merge(usuarioBD);
-                    em.getTransaction().commit();
-                }
+                usuario.setClosetActual(closet);
+                em.merge(usuario);
 
-                // 🔥 Aquí hacemos la consulta CORRECTA para traer las prendas
-                TypedQuery<Prenda> query = em.createQuery(
-                        "SELECT p FROM Prenda p WHERE p.closet.id = :closetId", Prenda.class);
-                query.setParameter("closetId", closet.getId());
-                List<Prenda> prendas = query.getResultList();
-
-                // 🔥 Actualizamos el closet con la lista verdadera
-                closet.setPrendas(prendas);
-
-                request.setAttribute("closet", closet);
-                session.setAttribute("usuario", usuarioBD);
-
-                request.getRequestDispatcher("miCloset.jsp").forward(request, response);
-
-            } else {
-                response.sendRedirect("login.jsp");
+                tx.commit();
+                System.out.println("✅ Closet creado con ID: " + closet.getIdCloset());
             }
 
+            // Cargar closet en atributos
+            request.setAttribute("closet", closet);
+            session.setAttribute("usuario", usuario); // Actualizar sesión
+
+            request.getRequestDispatcher("miCloset.jsp").forward(request, response);
+
         } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             e.printStackTrace();
             response.sendRedirect("login.jsp");
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
+            if (em.isOpen()) em.close();
         }
     }
 }

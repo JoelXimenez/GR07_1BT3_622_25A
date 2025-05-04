@@ -1,6 +1,7 @@
 package org.apptrueque.model;
 
 import jakarta.persistence.*;
+
 import java.util.Date;
 
 @Entity
@@ -25,25 +26,22 @@ public class Usuario {
     private Date fechaRegistro;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "closet_id", referencedColumnName = "id")
+    @JoinColumn(name = "closet_id", referencedColumnName = "idCloset") // CORREGIDO
     private Closet closetActual;
 
-    // Constructor vacío (requerido por JPA)
     public Usuario() {
         this.fechaRegistro = new Date();
     }
 
-    // Constructor con parámetros
     public Usuario(String cedula, String nombre, String email, String password) {
         this.cedula = cedula;
         this.nombre = nombre;
         this.email = email;
         this.password = password;
         this.fechaRegistro = new Date();
-        this.closetActual = new Closet(); // Al crear usuario, creamos su closet
+        this.closetActual = new Closet();
     }
 
-    // Método para registrar un nuevo usuario (guardar en base de datos)
     public static void registrar(Usuario usuario) {
         EntityManager em = null;
         try {
@@ -59,13 +57,10 @@ public class Usuario {
             e.printStackTrace();
             System.out.println("❌ Error al registrar el usuario.");
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            if (em != null) em.close();
         }
     }
 
-    // Método para buscar un usuario por su email
     public static Usuario obtenerPorEmail(String email) {
         EntityManager em = null;
         Usuario usuario = null;
@@ -83,15 +78,11 @@ public class Usuario {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            if (em != null) em.close();
         }
         return usuario;
     }
 
-
-    // Método para editar perfil (ej: actualizar nombre, email o password)
     public void editarPerfil(String nuevoNombre, String nuevoEmail, String nuevaPassword) {
         EntityManager em = null;
         try {
@@ -110,35 +101,63 @@ public class Usuario {
             e.printStackTrace();
             System.out.println("❌ Error al actualizar el perfil.");
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            if (em != null) em.close();
         }
     }
 
-    // Método para publicar closet del usuario
     public void publicarCloset() {
         if (closetActual != null) {
             closetActual.publicar();
         }
     }
 
-    // Getters y Setters
-    public String getCedula() { return cedula; }
-    public void setCedula(String cedula) { this.cedula = cedula; }
+    // Getters y setters
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getCedula() {
+        return cedula;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setCedula(String cedula) {
+        this.cedula = cedula;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getNombre() {
+        return nombre;
+    }
 
-    public Date getFechaRegistro() { return fechaRegistro; }
-    public void setFechaRegistro(Date fechaRegistro) { this.fechaRegistro = fechaRegistro; }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-    public Closet getClosetActual() { return closetActual; }
-    public void setClosetActual(Closet closetActual) { this.closetActual = closetActual; }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Date getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(Date fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+    }
+
+    public Closet getClosetActual() {
+        return closetActual;
+    }
+
+    public void setClosetActual(Closet closetActual) {
+        this.closetActual = closetActual;
+    }
 }

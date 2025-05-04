@@ -25,9 +25,9 @@ public class AgregarPrendaServlet extends HttpServlet {
             return;
         }
 
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
 
-        // Recoger datos del formulario
+        // Obtener parámetros del formulario
         String nombre = request.getParameter("nombre");
         String descripcion = request.getParameter("descripcion");
         String talla = request.getParameter("talla");
@@ -37,43 +37,40 @@ public class AgregarPrendaServlet extends HttpServlet {
 
         EntityManager em = JpaUtil.getEntityManagerFactory().createEntityManager();
 
-        em.getTransaction().begin();
         try {
-            // Recargar el usuario desde la base de datos
-            usuario = em.find(Usuario.class, usuario.getCedula());
+            em.getTransaction().begin();
+
+            // Obtener usuario y closet desde esta sesión de EntityManager
+            Usuario usuario = em.find(Usuario.class, usuarioSesion.getCedula());
 
             Closet closet = usuario.getClosetActual();
 
-            if (closet == null) {
-                closet = new Closet();
-                usuario.setClosetActual(closet);
-                em.persist(closet);
-                em.merge(usuario);
+            if (closet == null || closet.getIdCloset() == null) {
+                throw new IllegalStateException("❌ El closet no existe o no tiene ID válido.");
             }
 
-            // Crear nueva prenda
-            Prenda nuevaPrenda = new Prenda(nombre, descripcion, talla, estado, categoria, imagenURL);
+            // Reasociar el closet a esta sesión (garantizar que esté 'managed')
+            closet = em.find(Closet.class, closet.getIdCloset());
 
-            // Asociar la prenda al closet
-            closet.agregarPrenda(nuevaPrenda);
+            // Crear y guardar la prenda
+            Prenda prenda = new Prenda(nombre, descripcion, talla, estado, categoria, imagenURL);
+            prenda.setCloset(closet);  // asociación correcta
+            em.persist(prenda);
 
-            // Guardar cambios
-            em.merge(closet);
             em.getTransaction().commit();
 
-            System.out.println("✅ Prenda agregada correctamente al closet de " + usuario.getNombre());
+            System.out.println("✅ Prenda guardada correctamente para el usuario: " + usuario.getNombre());
 
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             e.printStackTrace();
-            System.out.println("❌ Error al agregar prenda.");
+            System.out.println("❌ Error al guardar la prenda.");
         } finally {
             if (em.isOpen()) {
                 em.close();
             }
-            // Siempre redirigir de vuelta al closet
             response.sendRedirect("MiClosetServlet");
         }
     }

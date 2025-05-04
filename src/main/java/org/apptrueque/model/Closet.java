@@ -1,28 +1,27 @@
 package org.apptrueque.model;
 
 import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "closet")
+@Table(name = "closets") // ✅ nombre correcto de la tabla
 public class Closet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "idCloset") // ✅ nombre correcto de la columna PK
+    private Long idCloset;
 
     private boolean publicado;
 
-    @OneToMany(mappedBy = "closet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "closet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Prenda> prendas = new ArrayList<>();
 
-    // Constructor vacío (requerido por JPA)
     public Closet() {
         this.publicado = false;
     }
-
-    // Métodos de negocio
 
     public void publicar() {
         this.publicado = true;
@@ -34,7 +33,7 @@ public class Closet {
 
     public void agregarPrenda(Prenda prenda) {
         prendas.add(prenda);
-        prenda.setCloset(this); // Importante para la relación bidireccional
+        prenda.setCloset(this);
     }
 
     public boolean validarMinimoPrendas() {
@@ -47,12 +46,27 @@ public class Closet {
 
     // Getters y Setters
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getIdCloset() {
+        return idCloset;
+    }
 
-    public boolean isPublicado() { return publicado; }
-    public void setPublicado(boolean publicado) { this.publicado = publicado; }
+    public void setIdCloset(Long idCloset) {
+        this.idCloset = idCloset;
+    }
 
-    public List<Prenda> getPrendas() { return prendas; }
-    public void setPrendas(List<Prenda> prendas) { this.prendas = prendas; }
+    public boolean isPublicado() {
+        return publicado;
+    }
+
+    public void setPublicado(boolean publicado) {
+        this.publicado = publicado;
+    }
+
+    public List<Prenda> getPrendas() {
+        return prendas;
+    }
+
+    public void setPrendas(List<Prenda> prendas) {
+        this.prendas = prendas;
+    }
 }
