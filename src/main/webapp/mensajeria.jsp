@@ -52,6 +52,26 @@
             background-color: #f9f9f9;
         }
 
+        .regresar-btn {
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        .regresar-btn form {
+            margin: 0;
+        }
+
+        .regresar-btn button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+        }
+
         .chat-area {
             flex: 1;
             display: flex;
@@ -70,6 +90,8 @@
             flex: 1;
             padding: 15px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .message {
@@ -123,29 +145,18 @@
         <input type="text" id="busqueda" placeholder="Buscar usuario...">
     </div>
     <div class="user-list" id="listaUsuarios">
-        <!-- Lista de usuarios se carga aquí -->
+        <!-- Lista de usuarios -->
     </div>
-</div>
-<div style="padding: 10px; border-top: 1px solid #ccc;">
-    <form action="home.jsp" method="get">
-        <button type="submit" style="
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            width: 100%;
-        ">Regresar a Inicio</button>
-    </form>
+    <div class="regresar-btn">
+        <form action="home.jsp" method="get">
+            <button type="submit">Regresar a Inicio</button>
+        </form>
+    </div>
 </div>
 
 <div class="chat-area">
     <div class="chat-header" id="chatHeader">Selecciona un usuario</div>
-    <div class="chat-box" id="chatBox">
-        <!-- Mensajes del chat -->
-    </div>
+    <div class="chat-box" id="chatBox"></div>
     <div class="chat-input">
         <input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." disabled>
         <button onclick="enviarMensaje()" disabled id="btnEnviar">Enviar</button>
@@ -157,8 +168,10 @@
     let usuarioDestino = null;
 
     function escapeHTML(str) {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+        return str.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
 
@@ -170,7 +183,9 @@
                 const filtro = document.getElementById("busqueda").value.toLowerCase();
                 lista.innerHTML = "";
                 data.forEach(user => {
-                    if (user.email.toLowerCase().includes(filtro) || user.nombre.toLowerCase().includes(filtro)) {
+                    const nombre = user.nombre.toLowerCase();
+                    const email = user.email.toLowerCase();
+                    if (nombre.includes(filtro) || email.includes(filtro)) {
                         const div = document.createElement("div");
                         div.className = "user-item";
                         div.innerText = user.nombre + " (" + user.email + ")";
@@ -191,7 +206,8 @@
 
     function cargarMensajes() {
         if (!usuarioDestino) return;
-        fetch("mensajeria?usuario1=" + encodeURIComponent(usuarioActual) + "&usuario2=" + encodeURIComponent(usuarioDestino))
+        fetch("mensajeria?usuario1=" + encodeURIComponent(usuarioActual) +
+            "&usuario2=" + encodeURIComponent(usuarioDestino))
             .then(res => res.json())
             .then(data => {
                 const chat = document.getElementById("chatBox");
@@ -211,6 +227,15 @@
         const contenido = input.value.trim();
         if (!contenido || !usuarioDestino) return;
 
+        // Mostrar mensaje localmente (como WhatsApp)
+        const chat = document.getElementById("chatBox");
+        const div = document.createElement("div");
+        div.className = "message";
+        div.innerHTML = escapeHTML(contenido);
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+
+        // Enviar mensaje al servidor
         fetch("mensajeria", {
             method: "POST",
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
