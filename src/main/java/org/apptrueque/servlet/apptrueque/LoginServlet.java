@@ -13,30 +13,44 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html; charset=UTF-8");
+        procesarLogin(request, response);
+    }
 
-        // Obtenemos los parámetros del formulario
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
+    private void procesarLogin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String email = obtenerEmail(request);
+        String password = obtenerPassword(request);
 
-        // Intentamos obtener el usuario de la base de datos
-        Usuario usuario = Usuario.obtenerPorEmail(email);
+        Usuario usuario = validarUsuario(email, password);
 
-        // Verificamos si el usuario existe y la contraseña es correcta
-        if (usuario != null && usuario.getPassword().equals(password)) {
-            // 🔥 Guardamos el usuario en sesión
-            HttpSession session = request.getSession(true);
-            session.setAttribute("usuario", usuario);
-
-            // Redirigimos a la página principal
+        if (usuario != null) {
+            iniciarSesion(request, usuario);
             response.sendRedirect("home.jsp");
         } else {
-            // Si las credenciales son incorrectas, establecemos un mensaje de error
-            String errorMessage = "Credenciales incorrectas. Intenta de nuevo.";
-
-            // Enviamos el mensaje de error a la página de login
-            request.setAttribute("errorMessage", errorMessage);
-            request.getRequestDispatcher("/login.jsp").forward(request, response);
+            mostrarError(request, response);
         }
+    }
+
+    private String obtenerEmail(HttpServletRequest request) {
+        return request.getParameter("email");
+    }
+
+    private String obtenerPassword(HttpServletRequest request) {
+        return request.getParameter("password");
+    }
+
+    private Usuario validarUsuario(String email, String password) {
+        Usuario usuario = Usuario.obtenerPorEmail(email);
+        return (usuario != null && usuario.getPassword().equals(password)) ? usuario : null;
+    }
+
+    private void iniciarSesion(HttpServletRequest request, Usuario usuario) {
+        HttpSession session = request.getSession(true);
+        session.setAttribute("usuario", usuario);
+    }
+
+    private void mostrarError(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String errorMessage = "Credenciales incorrectas. Intenta de nuevo.";
+        request.setAttribute("errorMessage", errorMessage);
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 }

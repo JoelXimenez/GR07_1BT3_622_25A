@@ -15,28 +15,38 @@ public class EditarPerfilServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String cedula = request.getParameter("cedula");
-        String nombre = request.getParameter("nombre");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
+        Usuario datosActualizados = recolectarDatosFormulario(request);
 
+        actualizarPerfil(datosActualizados, request, response);
+    }
+
+    // Recolectar los datos del formulario
+    private Usuario recolectarDatosFormulario(HttpServletRequest request) {
+        Usuario usuario = new Usuario();
+        usuario.setCedula(request.getParameter("cedula"));
+        usuario.setNombre(request.getParameter("nombre"));
+        usuario.setEmail(request.getParameter("email"));
+        usuario.setPassword(request.getParameter("password"));
+        return usuario;
+    }
+
+    // Método que realiza la lógica de actualización
+    private void actualizarPerfil(Usuario nuevosDatos, HttpServletRequest request, HttpServletResponse response) throws IOException {
         EntityManager em = null;
         try {
             em = JpaUtil.getEntityManagerFactory().createEntityManager();
             em.getTransaction().begin();
 
-            Usuario usuario = em.find(Usuario.class, cedula);
-            if (usuario != null) {
-                usuario.setNombre(nombre);
-                usuario.setEmail(email);
-                usuario.setPassword(password);
+            Usuario usuarioBD = em.find(Usuario.class, nuevosDatos.getCedula());
+            if (usuarioBD != null) {
+                usuarioBD.setNombre(nuevosDatos.getNombre());
+                usuarioBD.setEmail(nuevosDatos.getEmail());
+                usuarioBD.setPassword(nuevosDatos.getPassword());
 
-                em.merge(usuario); // Actualiza el usuario
+                em.merge(usuarioBD);
                 em.getTransaction().commit();
 
-                // Actualizar el usuario en sesión también
-                HttpSession session = request.getSession();
-                session.setAttribute("usuario", usuario);
+                request.getSession().setAttribute("usuario", usuarioBD);
             }
 
             response.sendRedirect("perfil.jsp");
@@ -47,9 +57,8 @@ public class EditarPerfilServlet extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect("error.jsp");
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            if (em != null) em.close();
         }
     }
 }
+
