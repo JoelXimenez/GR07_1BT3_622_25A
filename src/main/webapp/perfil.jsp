@@ -145,7 +145,17 @@
         <p><strong>Fecha Registro:</strong> <%= formatoFecha.format(usuario.getFechaRegistro()) %></p>
     </div>
 
+    <!-- Botón Editar Perfil -->
     <button class="boton editar-btn" onclick="abrirModal()">Editar Perfil</button><br>
+
+    <!-- Botón Estadísticas del Closet -->
+    <form action="EstadisticasClosetServlet" method="get" style="margin-top: 10px;">
+        <button class="boton editar-btn" style="background-color: #17a2b8;" type="submit">
+            📊 Ver estadísticas del closet
+        </button>
+    </form>
+
+    <!-- Botón Regresar -->
     <a class="boton regresar-btn" href="home.jsp">Regresar</a>
 </div>
 

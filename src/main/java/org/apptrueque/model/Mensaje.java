@@ -23,49 +23,23 @@ public class Mensaje {
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
 
-    // Constructor vacío requerido por JPA
     public Mensaje() {
-        this.fechaHora = LocalDateTime.now(); // inicialización automática
+        this.fechaHora = LocalDateTime.now();
     }
 
     // Getters y Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getRemitenteEmail() { return remitenteEmail; }
+    public void setRemitenteEmail(String remitenteEmail) { this.remitenteEmail = remitenteEmail; }
 
-    public String getRemitenteEmail() {
-        return remitenteEmail;
-    }
+    public String getDestinatarioEmail() { return destinatarioEmail; }
+    public void setDestinatarioEmail(String destinatarioEmail) { this.destinatarioEmail = destinatarioEmail; }
 
-    public void setRemitenteEmail(String remitenteEmail) {
-        this.remitenteEmail = remitenteEmail;
-    }
+    public String getContenido() { return contenido; }
+    public void setContenido(String contenido) { this.contenido = contenido; }
 
-    public String getDestinatarioEmail() {
-        return destinatarioEmail;
-    }
-
-    public void setDestinatarioEmail(String destinatarioEmail) {
-        this.destinatarioEmail = destinatarioEmail;
-    }
-
-    public String getContenido() {
-        return contenido;
-    }
-
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
-    }
-
-    public LocalDateTime getFechaHora() {
-        return fechaHora;
-    }
-
-    public void setFechaHora(LocalDateTime fechaHora) {
-        this.fechaHora = fechaHora;
-    }
+    public LocalDateTime getFechaHora() { return fechaHora; }
+    public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }
 }
