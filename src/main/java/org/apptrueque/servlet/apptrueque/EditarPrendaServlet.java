@@ -19,20 +19,16 @@ public class EditarPrendaServlet extends HttpServlet {
     }
 
     private void editarPrenda(HttpServletRequest request) {
-        Long id = Long.parseLong(request.getParameter("id"));
-        String nombre = request.getParameter("nombre");
-        String descripcion = request.getParameter("descripcion");
-        String talla = request.getParameter("talla");
-        String estado = request.getParameter("estado");
-        String categoria = request.getParameter("categoria");
+        Prenda prendaFormulario = recolectarDatosFormulario(request);
+
 
         EntityManager em = JpaUtil.getEntityManagerFactory().createEntityManager();
 
         try {
             em.getTransaction().begin();
-            Prenda prenda = em.find(Prenda.class, id);
+            Prenda prenda = em.find(Prenda.class, prendaFormulario.getId());
             if (prenda != null) {
-                actualizarPrenda(prenda, nombre, descripcion, talla, estado, categoria);
+                actualizarPrenda(prenda, prendaFormulario);
                 em.merge(prenda);
             }
             em.getTransaction().commit();
@@ -46,12 +42,30 @@ public class EditarPrendaServlet extends HttpServlet {
         }
     }
 
-    private void actualizarPrenda(Prenda prenda, String nombre, String descripcion, String talla, String estado, String categoria) {
-        if (nombre != null && !nombre.trim().isEmpty()) prenda.setNombre(nombre);
-        if (descripcion != null && !descripcion.trim().isEmpty()) prenda.setDescripcion(descripcion);
-        if (talla != null && !talla.trim().isEmpty()) prenda.setTalla(talla);
-        if (estado != null && !estado.trim().isEmpty()) prenda.setEstado(estado);
-        if (categoria != null && !categoria.trim().isEmpty()) prenda.setCategoria(categoria);
+    private void actualizarPrenda(Prenda original, Prenda nuevosDatos) {
+        if (nuevosDatos.getNombre() != null && !nuevosDatos.getNombre().trim().isEmpty())
+            original.setNombre(nuevosDatos.getNombre());
+        if (nuevosDatos.getDescripcion() != null && !nuevosDatos.getDescripcion().trim().isEmpty())
+            original.setDescripcion(nuevosDatos.getDescripcion());
+        if (nuevosDatos.getTalla() != null && !nuevosDatos.getTalla().trim().isEmpty())
+            original.setTalla(nuevosDatos.getTalla());
+        if (nuevosDatos.getEstado() != null && !nuevosDatos.getEstado().trim().isEmpty())
+            original.setEstado(nuevosDatos.getEstado());
+        if (nuevosDatos.getCategoria() != null && !nuevosDatos.getCategoria().trim().isEmpty())
+            original.setCategoria(nuevosDatos.getCategoria());
     }
+
+
+    private Prenda recolectarDatosFormulario(HttpServletRequest request) {
+        Prenda prenda = new Prenda();
+        prenda.setId(Long.parseLong(request.getParameter("id")));
+        prenda.setNombre(request.getParameter("nombre"));
+        prenda.setDescripcion(request.getParameter("descripcion"));
+        prenda.setTalla(request.getParameter("talla"));
+        prenda.setEstado(request.getParameter("estado"));
+        prenda.setCategoria(request.getParameter("categoria"));
+        return prenda;
+    }
+
 }
 
