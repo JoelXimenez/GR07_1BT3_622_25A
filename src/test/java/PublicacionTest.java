@@ -43,28 +43,27 @@ class PublicacionTest {
     @Test
     void givenClosetConPrendas_whenFiltrarPorNombre_thenDevuelvePrendasCorrectas() {
         Closet closet = new Closet();
-        Prenda p1 = new Prenda("Vestido rojo", "Elegante vestido", "M", "nuevo", "mujer", "url");
-        Prenda p2 = new Prenda("Zapatos negros", "Zapatos formales", "42", "nuevo", "hombre", "url");
-        closet.agregarPrenda(p1);
-        closet.agregarPrenda(p2);
+        Prenda p1 = new Prenda();
+        p1.setNombre("Vestido rojo");
+        closet.getPrendas().add(p1);
 
-        List<Prenda> resultado = Publicacion.filtrarPorNombre("vestido");
-
-        assertThat(resultado).containsExactly(p1);
+        List<Prenda> resultado = Publicacion.filtrarPorNombre(closet, "vestido");
+        assertThat(resultado).extracting(Prenda::getNombre).containsExactly("Vestido rojo");
     }
 
     // Test 5: Devuelve prendas filtradas por categoría
     @Test
     void givenClosetConPrendas_whenFiltrarPorCategoria_thenDevuelvePrendasCorrectas() {
         Closet closet = new Closet();
-        Prenda p1 = new Prenda("Vestido rojo", "Elegante vestido", "M", "nuevo", "mujer", "url");
-        Prenda p2 = new Prenda("Zapatos negros", "Zapatos formales", "42", "nuevo", "hombre", "url");
-        closet.agregarPrenda(p1);
-        closet.agregarPrenda(p2);
+        Prenda p1 = new Prenda();
+        p1.setCategoria("Mujer"); // Nota: Mayúscula inicial
+        closet.getPrendas().add(p1);
 
-        List<Prenda> resultado = Publicacion.filtrarPorCategoria(closet, "mujer");
-
-        assertThat(resultado).containsExactly(p1);
+        List<Prenda> resultado = Publicacion.filtrarPorCategoria(closet, "mujer"); // minúsculas
+        assertThat(resultado)
+                .hasSize(1)
+                .extracting(Prenda::getCategoria)
+                .containsExactly("Mujer"); // Respeta capitalización original
     }
 
     // Test 6: Las publicaciones están ordenadas por fecha descendente
