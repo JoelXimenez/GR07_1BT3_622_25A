@@ -31,15 +31,20 @@ public class MiClosetServlet extends HttpServlet {
         EntityTransaction tx = em.getTransaction();
 
         try {
+            // Aquí estamos obteniendo el usuario con su closet y las prendas relacionadas.
             Usuario usuario = obtenerUsuarioConCloset(em, usuarioSesion);
             Closet closet = usuario.getClosetActual();
 
+            // Si no tiene un closet asignado, creamos uno nuevo.
             if (closet == null) {
                 closet = crearClosetSiNoExiste(em, tx, usuario);
             }
 
+            // Pasamos el closet a la vista
             request.setAttribute("closet", closet);
             session.setAttribute("usuario", usuario);
+
+            // Ahora la JSP debe mostrar siempre las prendas.
             request.getRequestDispatcher("miCloset.jsp").forward(request, response);
 
         } catch (Exception e) {
@@ -51,6 +56,20 @@ public class MiClosetServlet extends HttpServlet {
         }
     }
 
+    private Usuario obtenerUsuarioConCloset(EntityManager em, Usuario usuarioSesion) {
+        // Consulta para obtener el usuario con su closet y prendas.
+        return em.createQuery(
+                        "SELECT u FROM Usuario u " +
+                                "LEFT JOIN FETCH u.closetActual c " +  // Aquí estamos haciendo un LEFT JOIN FETCH
+                                "LEFT JOIN FETCH c.prendas " +        // Esto asegura que se carguen las prendas.
+                                "WHERE u.cedula = :cedula", Usuario.class)
+                .setParameter("cedula", usuarioSesion.getCedula())
+                .getSingleResult();
+    }
+
+
+
+
     private Usuario obtenerSesionUsuario(HttpSession session, HttpServletResponse response) throws IOException {
         if (session == null || session.getAttribute("usuario") == null) {
             response.sendRedirect("login.jsp");
@@ -59,15 +78,6 @@ public class MiClosetServlet extends HttpServlet {
         return (Usuario) session.getAttribute("usuario");
     }
 
-    private Usuario obtenerUsuarioConCloset(EntityManager em, Usuario usuarioSesion) {
-        return em.createQuery(
-                        "SELECT u FROM Usuario u " +
-                                "LEFT JOIN FETCH u.closetActual c " +
-                                "LEFT JOIN FETCH c.prendas " +
-                                "WHERE u.cedula = :cedula", Usuario.class)
-                .setParameter("cedula", usuarioSesion.getCedula())
-                .getSingleResult();
-    }
 
     private Closet crearClosetSiNoExiste(EntityManager em, EntityTransaction tx, Usuario usuario) {
         Closet closet = new Closet();

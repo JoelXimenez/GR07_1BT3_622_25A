@@ -1,11 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="org.apptrueque.model.Closet" %>
 <%@ page import="org.apptrueque.model.Prenda" %>
+<%@ page import="jakarta.persistence.EntityManager" %>
+<%@ page import="jakarta.persistence.TypedQuery" %>
+<%@ page import="org.apptrueque.util.JpaUtil" %>
 <%@ page import="java.util.List" %>
-
 <%
-    Closet closet = (Closet) request.getAttribute("closet");
-    List<Prenda> prendas = (closet != null) ? closet.getPrendas() : null;
+    EntityManager em = JpaUtil.getEntityManagerFactory().createEntityManager();
+    TypedQuery<Prenda> query = em.createQuery("SELECT p FROM Prenda p", Prenda.class);
+    List<Prenda> prendas = query.getResultList();
+    em.close();
 %>
 
 <!DOCTYPE html>
@@ -21,19 +24,22 @@
             margin: 0;
             padding: 20px;
         }
+
         .container {
             max-width: 1000px;
             margin: auto;
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             text-align: center;
         }
+
         h1 {
             margin-bottom: 30px;
             color: #333;
         }
+
         .button-group {
             display: flex;
             justify-content: center;
@@ -41,6 +47,7 @@
             gap: 15px;
             margin-bottom: 30px;
         }
+
         .btn {
             padding: 12px 20px;
             border-radius: 8px;
@@ -53,54 +60,69 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        .btn-verde { background-color: #4CAF50; }
-        .btn-verde:hover { background-color: #45a049; }
-        .btn-rojo { background-color: #f44336; }
-        .btn-rojo:hover { background-color: #d32f2f; }
-        .btn i { margin-right: 8px; }
+
+        .btn-verde {
+            background-color: #4CAF50;
+        }
+
+        .btn-verde:hover {
+            background-color: #45a049;
+        }
+
+        .btn-rojo {
+            background-color: #f44336;
+        }
+
+        .btn-rojo:hover {
+            background-color: #d32f2f;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
+
         table, th, td {
             border: 1px solid #ccc;
         }
+
         th, td {
             padding: 12px;
             text-align: center;
         }
+
         th {
             background-color: #4CAF50;
             color: white;
         }
-        /* Modales */
+
         .modal {
             display: none;
             position: fixed;
             z-index: 999;
-            padding-top: 80px;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
+            padding-top: 60px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.4);
         }
+
         .modal-content {
-            background-color: #fff;
+            background-color: #fefefe;
             margin: auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 500px;
+            width: 400px;
             border-radius: 10px;
-            text-align: center;
         }
-        .modal-content input, .modal-content select {
-            width: 90%;
-            margin: 8px 0;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+
         .close {
             color: #aaa;
             float: right;
@@ -108,26 +130,38 @@
             font-weight: bold;
             cursor: pointer;
         }
-        .close:hover { color: black; }
+
+        .close:hover {
+            color: black;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
     </style>
 </head>
-
 <body>
-
 <div class="container">
     <h1>Mi Closet</h1>
 
     <div class="button-group">
-        <button class="btn btn-verde" onclick="openModal('modalAgregar')"><i class="fas fa-plus"></i> Agregar Prenda</button>
-        <button class="btn btn-verde" onclick="openModal('modalEditar')"><i class="fas fa-edit"></i> Editar Prenda</button>
-        <button class="btn btn-verde" onclick="openModal('modalEliminar')"><i class="fas fa-trash"></i> Eliminar Prenda</button>
-        <button class="btn btn-verde" onclick="abrirConfirmacionPublicar()"><i class="fas fa-bullhorn"></i> Publicar Closet</button>
+        <button class="btn btn-verde" onclick="document.getElementById('modalAgregar').style.display='block'"><i
+                class="fas fa-plus"></i> Agregar Prenda
+        </button>
+        <button class="btn btn-verde" onclick="abrirModalEditar()" type="button">
+            <i class="fas fa-edit"></i> Editar Prenda
+        </button>
+        <form method="POST" action="EliminarPrendaServlet" id="formEliminar">
+            <input type="hidden" name="id" id="eliminarId">
+            <button class="btn btn-rojo" type="submit"><i class="fas fa-trash"></i> Eliminar Prenda</button>
+        </form>
         <a href="home.jsp" class="btn btn-rojo"><i class="fas fa-home"></i> Regresar</a>
     </div>
 
-    <h2>Mis Prendas</h2>
-
-    <% if (prendas != null && !prendas.isEmpty()) { %>
     <table>
         <thead>
         <tr>
@@ -136,125 +170,133 @@
             <th>Talla</th>
             <th>Estado</th>
             <th>Categoría</th>
+            <th>Seleccionar</th>
         </tr>
         </thead>
         <tbody>
         <% for (Prenda prenda : prendas) { %>
-        <tr>
-            <td><%= prenda.getNombre() %></td>
-            <td><%= prenda.getDescripcion() != null ? prenda.getDescripcion() : "-" %></td>
-            <td><%= prenda.getTalla() != null ? prenda.getTalla() : "-" %></td>
-            <td><%= prenda.getEstado() != null ? prenda.getEstado() : "-" %></td>
-            <td><%= prenda.getCategoria() != null ? prenda.getCategoria() : "-" %></td>
+        <tr onclick="seleccionar(<%= prenda.getId() %>)">
+            <td><%= prenda.getNombre() %>
+            </td>
+            <td><%= prenda.getDescripcion() %>
+            </td>
+            <td><%= prenda.getTalla() %>
+            </td>
+            <td><%= prenda.getEstado() %>
+            </td>
+            <td><%= prenda.getCategoria() %>
+            </td>
+            <td><input type="radio" name="seleccionPrenda" value="<%= prenda.getId() %>"
+                       onclick="seleccionar(<%= prenda.getId() %>)"></td>
         </tr>
         <% } %>
         </tbody>
     </table>
-    <% } else { %>
-    <p>No tienes prendas registradas.</p>
-    <% } %>
-
 </div>
 
-<!-- Modales -->
+<!-- ... encabezado y tabla sin cambios ... -->
+<!-- Modal Agregar -->
 <div id="modalAgregar" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('modalAgregar')">&times;</span>
-        <h2>Agregar Prenda</h2>
-        <form action="AgregarPrendaServlet" method="post">
+    <div class="modal-content" style="width: 500px;">
+        <span class="close" onclick="document.getElementById('modalAgregar').style.display='none'">&times;</span>
+        <h2>Agregar Nueva Prenda</h2>
+        <form method="POST" action="AgregarPrendaServlet" onsubmit="return validarCampos(this)">
             <input type="text" name="nombre" placeholder="Nombre" required>
-            <input type="text" name="descripcion" placeholder="Descripción">
-            <input type="text" name="talla" placeholder="Talla">
-            <input type="text" name="estado" placeholder="Estado">
-            <input type="text" name="categoria" placeholder="Categoría">
-            <input type="text" name="imagenURL" placeholder="URL Imagen (opcional)">
-            <button type="submit" class="btn btn-verde">Guardar</button>
+            <input type="text" name="descripcion" placeholder="Descripción" required>
+            <input type="text" name="talla" placeholder="Talla" required>
+            <input type="text" name="estado" placeholder="Estado" required>
+            <input type="text" name="categoria" placeholder="Categoría" required>
+            <input type="text" name="imagenUrl" placeholder="URL de la imagen (opcional)">
+            <button class="btn btn-verde" type="submit"><i class="fas fa-plus-circle"></i> Guardar</button>
+            <button class="btn btn-rojo" type="button" onclick="document.getElementById('modalAgregar').style.display='none'"><i class="fas fa-times"></i> Cancelar</button>
         </form>
     </div>
 </div>
 
+<!-- Modal Editar -->
 <div id="modalEditar" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('modalEditar')">&times;</span>
+    <div class="modal-content" style="width: 500px;">
+        <span class="close" onclick="document.getElementById('modalEditar').style.display='none'">&times;</span>
         <h2>Editar Prenda</h2>
-        <form action="EditarPrendaServlet" method="post">
-            <select name="id" required>
-                <option value="">-- Selecciona una prenda --</option>
-                <% if (prendas != null) {
-                    for (Prenda prenda : prendas) { %>
-                <option value="<%= prenda.getId() %>"><%= prenda.getNombre() %></option>
-                <% } } %>
-            </select>
-            <input type="text" name="nombre" placeholder="Nuevo Nombre (opcional)">
-            <input type="text" name="descripcion" placeholder="Nueva Descripción (opcional)">
-            <input type="text" name="talla" placeholder="Nueva Talla (opcional)">
-            <input type="text" name="estado" placeholder="Nuevo Estado (opcional)">
-            <input type="text" name="categoria" placeholder="Nueva Categoría (opcional)">
-            <button type="submit" class="btn btn-verde">Actualizar</button>
+        <form method="POST" action="EditarPrendaServlet">
+            <input type="hidden" name="id" id="editId">
+            <input type="text" name="nombre" id="editNombre" placeholder="Nombre (opcional)">
+            <input type="text" name="descripcion" id="editDescripcion" placeholder="Descripción (opcional)">
+            <input type="text" name="talla" id="editTalla" placeholder="Talla (opcional)">
+            <input type="text" name="estado" id="editEstado" placeholder="Estado (opcional)">
+            <input type="text" name="categoria" id="editCategoria" placeholder="Categoría (opcional)">
+            <input type="text" name="imagenUrl" id="editImagenUrl" placeholder="URL de la imagen (opcional)">
+            <p style="font-size: 14px; color: #777">Deja en blanco los campos que no deseas modificar.</p>
+            <button class="btn btn-verde" type="submit"><i class="fas fa-save"></i> Actualizar</button>
+            <button class="btn btn-rojo" type="button" onclick="document.getElementById('modalEditar').style.display='none'"><i class="fas fa-times"></i> Cancelar</button>
         </form>
     </div>
 </div>
 
-<div id="modalEliminar" class="modal">
+<!-- Modal Confirmar Eliminar -->
+<div id="modalEliminarConfirmar" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeModal('modalEliminar')">&times;</span>
-        <h2>Eliminar Prenda</h2>
-        <form action="EliminarPrendaServlet" method="post">
-            <select name="id" required>
-                <option value="">-- Selecciona una prenda --</option>
-                <% if (prendas != null) {
-                    for (Prenda prenda : prendas) { %>
-                <option value="<%= prenda.getId() %>"><%= prenda.getNombre() %></option>
-                <% } } %>
-            </select>
-            <button type="submit" class="btn btn-rojo" onclick="return confirm('¿Seguro que deseas eliminar esta prenda?')">Eliminar</button>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Confirmar Publicar -->
-<div id="modalConfirmarPublicar" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('modalConfirmarPublicar')">&times;</span>
-        <h2>¿Confirmar publicación?</h2>
-        <button onclick="publicarCloset()" class="btn btn-verde">Sí, Publicar</button>
-        <button onclick="closeModal('modalConfirmarPublicar')" class="btn btn-rojo">Cancelar</button>
-    </div>
-</div>
-
-<!-- Modal Mensaje -->
-<div id="modalMensaje" class="modal">
-    <div class="modal-content" id="mensajeContenido">
-        <h2 id="mensajeTexto"></h2>
-        <button onclick="closeModal('modalMensaje')" class="btn btn-verde">Aceptar</button>
+        <span class="close" onclick="document.getElementById('modalEliminarConfirmar').style.display='none'">&times;</span>
+        <h3>¿Seguro que deseas eliminar esta prenda?</h3>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            <button class="btn btn-rojo" onclick="document.getElementById('formEliminar').submit()">Sí, eliminar</button>
+            <button class="btn btn-verde" onclick="document.getElementById('modalEliminarConfirmar').style.display='none'">No, cancelar</button>
+        </div>
     </div>
 </div>
 
 <script>
-    function openModal(id) {
-        document.getElementById(id).style.display = 'block';
-    }
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
+    let prendaSeleccionada = false;
+
+    function seleccionar(id, nombre, descripcion, talla, estado, categoria, imagenUrl) {
+        prendaSeleccionada = true;
+        document.getElementById("eliminarId").value = id;
+        document.getElementById("editId").value = id;
+        document.getElementById("editNombre").value = nombre || '';
+        document.getElementById("editDescripcion").value = descripcion || '';
+        document.getElementById("editTalla").value = talla || '';
+        document.getElementById("editEstado").value = estado || '';
+        document.getElementById("editCategoria").value = categoria || '';
+        document.getElementById("editImagenUrl").value = imagenUrl || '';
     }
 
-    function abrirConfirmacionPublicar() {
-        openModal('modalConfirmarPublicar');
-    }
-
-    function publicarCloset() {
-        closeModal('modalConfirmarPublicar');
-        const cantidadPrendas = <%= (prendas != null) ? prendas.size() : 0 %>;
-
-        if (cantidadPrendas >= 3 && cantidadPrendas <= 10) {
-            document.getElementById('mensajeTexto').innerText = 'Clóset publicado exitosamente.';
-        } else {
-            document.getElementById('mensajeTexto').innerText = 'Debes tener entre 3 y 10 prendas para publicar tu clóset.';
+    function abrirModalEditar() {
+        if (!prendaSeleccionada || !document.getElementById("editId").value) {
+            alert("Por favor selecciona una prenda primero.");
+            return;
         }
+        document.getElementById("modalEditar").style.display = "block";
+    }
 
-        openModal('modalMensaje');
+    document.getElementById("formEliminar").addEventListener("submit", function(e) {
+        if (!prendaSeleccionada || !document.getElementById("eliminarId").value) {
+            e.preventDefault();
+            alert("Por favor selecciona una prenda primero.");
+            return;
+        }
+        e.preventDefault();
+        document.getElementById("modalEliminarConfirmar").style.display = "block";
+    });
+
+    function validarCampos(form) {
+        const campos = form.querySelectorAll("input[required]");
+        for (let campo of campos) {
+            if (!campo.value.trim()) {
+                alert("Por favor completa todos los campos obligatorios.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    window.onclick = function(event) {
+        const modales = ["modalAgregar", "modalEditar", "modalEliminarConfirmar"];
+        for (let id of modales) {
+            const modal = document.getElementById(id);
+            if (event.target === modal) modal.style.display = "none";
+        }
     }
 </script>
-
 </body>
 </html>
+

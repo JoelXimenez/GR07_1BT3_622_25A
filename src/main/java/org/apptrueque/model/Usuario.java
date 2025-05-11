@@ -26,7 +26,7 @@ public class Usuario {
     private Date fechaRegistro;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "closet_id", referencedColumnName = "idCloset") // CORREGIDO
+    @JoinColumn(name = "closet_id", referencedColumnName = "idCloset")
     private Closet closetActual;
 
     public Usuario() {
@@ -39,7 +39,10 @@ public class Usuario {
         this.email = email;
         this.password = password;
         this.fechaRegistro = new Date();
-        this.closetActual = new Closet();
+
+        Closet closet = new Closet();
+        closet.setUsuario(this);      // MUY IMPORTANTE
+        this.closetActual = closet;
     }
 
     public static void registrar(Usuario usuario) {
@@ -82,6 +85,29 @@ public class Usuario {
         }
         return usuario;
     }
+
+    public static Usuario obtenerPorCedula(String cedula) {
+        EntityManager em = null;
+        Usuario usuario = null;
+        try {
+            em = org.apptrueque.util.JpaUtil.getEntityManagerFactory().createEntityManager();
+            usuario = em.createQuery(
+                            "SELECT u FROM Usuario u " +
+                                    "LEFT JOIN FETCH u.closetActual c " +
+                                    "LEFT JOIN FETCH c.prendas " +
+                                    "WHERE u.cedula = :cedula", Usuario.class)
+                    .setParameter("cedula", cedula)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            usuario = null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (em != null) em.close();
+        }
+        return usuario;
+    }
+
 
     public void editarPerfil(String nuevoNombre, String nuevoEmail, String nuevaPassword) {
         EntityManager em = null;
@@ -160,4 +186,5 @@ public class Usuario {
     public void setClosetActual(Closet closetActual) {
         this.closetActual = closetActual;
     }
+
 }

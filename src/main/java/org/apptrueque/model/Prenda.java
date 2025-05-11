@@ -163,4 +163,12 @@ public class Prenda {
     public void setCloset(Closet closet) {
         this.closet = closet;
     }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenURL = imagenUrl;
+    }
+
+    public String getImagenUrl() {
+        return imagenURL;
+    }
 }

@@ -6,46 +6,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "closets") // ✅ nombre correcto de la tabla
+@Table(name = "closets")
 public class Closet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idCloset") // ✅ nombre correcto de la columna PK
     private Long idCloset;
 
-    private boolean publicado;
+    @OneToOne(mappedBy = "closetActual")
+    private Usuario usuario;
 
-    @OneToMany(mappedBy = "closet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "closet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Prenda> prendas = new ArrayList<>();
 
+    @Column(nullable = false)
+    private boolean publicado;  // Campo añadido
+
     public Closet() {
-        this.publicado = false;
+        this.publicado = false;  // Valor predeterminado
     }
 
     public void publicar() {
-        this.publicado = true;
+        this.publicado = true;  // Cambia el estado a 'publicado'
+        System.out.println("📢 Closet publicado.");
     }
 
-    public void ocultar() {
-        this.publicado = false;
-    }
-
-    public void agregarPrenda(Prenda prenda) {
-        prendas.add(prenda);
-        prenda.setCloset(this);
-    }
-
-    public boolean validarMinimoPrendas() {
-        return prendas.size() >= 1;
-    }
-
-    public boolean validarMaximoPrendas() {
-        return prendas.size() <= 20;
-    }
-
-    // Getters y Setters
-
+    // Getters y setters
     public Long getIdCloset() {
         return idCloset;
     }
@@ -54,12 +40,12 @@ public class Closet {
         this.idCloset = idCloset;
     }
 
-    public boolean isPublicado() {
-        return publicado;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setPublicado(boolean publicado) {
-        this.publicado = publicado;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public List<Prenda> getPrendas() {
@@ -68,5 +54,13 @@ public class Closet {
 
     public void setPrendas(List<Prenda> prendas) {
         this.prendas = prendas;
+    }
+
+    public boolean isPublicado() {
+        return publicado;
+    }
+
+    public void setPublicado(boolean publicado) {
+        this.publicado = publicado;
     }
 }

@@ -40,7 +40,7 @@
         }
         .registro-container button,
         .registro-container a.button-cancelar {
-            width: 100%; /* Este puede mantenerse si quieres que ocupen el ancho completo, pero se puede ajustar */
+            width: 100%;
             padding: 12px;
             margin-top: 10px;
             display: inline-block;
@@ -48,7 +48,7 @@
             font-size: 16px;
             border-radius: 5px;
             text-decoration: none;
-            box-sizing: border-box; /* Asegura que el padding no agrande el ancho */
+            box-sizing: border-box;
         }
         .registro-container button {
             background-color: #4CAF50;
@@ -67,24 +67,37 @@
             background-color: #d32f2f;
         }
 
-        /* Cambia el ancho aquí si quieres un tamaño específico */
         .registro-container button,
         .registro-container a.button-cancelar {
-            width: calc(50% - 10px); /* Ajusta el tamaño de los botones */
+            width: calc(50% - 10px);
             display: inline-block;
         }
 
-        /* Separar un poco los botones */
         .registro-container .button-cancelar {
             margin-left: 10px;
         }
 
+        /* Estilo para mostrar el mensaje de error */
+        .error-message {
+            color: red;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="registro-container">
     <h1>Registro de Usuario</h1>
+
+    <!-- Mostrar el mensaje de error si existe -->
+    <c:if test="${not empty errorMessage}">
+        <div class="error-message">
+                ${errorMessage}
+        </div>
+    </c:if>
+
     <form action="signup" method="post">
         <label for="cedula">Cédula:</label>
         <input type="text" id="cedula" name="cedula" required>
