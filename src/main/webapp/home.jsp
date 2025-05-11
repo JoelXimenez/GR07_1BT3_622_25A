@@ -87,7 +87,8 @@
 
         <div class="btn-container">
             <a href="miCloset.jsp" class="btn-verde"><i class="fas fa-tshirt"></i> Mi Closet</a>
-            <a href="mensajeria.jsp" class="btn-verde"><i class="fas fa-comment-dots"></i> Mensajería</a>
+            <a href="publicaciones.jsp" class="btn-verde"><i class="fas fa-bullhorn"></i> Publicaciones</a>
+            <a href="chat.jsp" class="btn-verde"><i class="fas fa-comment-dots"></i> Mensajería</a>
             <a href="perfil.jsp" class="btn-verde"><i class="fas fa-user"></i> Mi Perfil</a>
             <a href="login.jsp" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>

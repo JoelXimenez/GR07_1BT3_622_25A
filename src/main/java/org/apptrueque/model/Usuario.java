@@ -29,6 +29,8 @@ public class Usuario {
     @JoinColumn(name = "closet_id", referencedColumnName = "idCloset")
     private Closet closetActual;
 
+
+
     public Usuario() {
         this.fechaRegistro = new Date();
     }

@@ -1,6 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="org.apptrueque.model.Usuario" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="org.apptrueque.model.Prenda" %>
+<%@ page import="jakarta.persistence.EntityManager" %>
+<%@ page import="org.apptrueque.util.JpaUtil" %>
+<%@ page import="org.apptrueque.model.Closet" %>
+<%@ page import="java.util.List" %>
 
 <%
     Usuario usuario = (Usuario) session.getAttribute("usuario");
@@ -146,14 +151,13 @@
     </div>
 
     <!-- Botón Editar Perfil -->
-    <button class="boton editar-btn" onclick="abrirModal()">Editar Perfil</button><br>
+    <button class="boton editar-btn" onclick="abrirModal('modalEditarPerfil')">Editar Perfil</button>
 
-    <!-- Botón Estadísticas del Closet -->
-    <form action="EstadisticasClosetServlet" method="get" style="margin-top: 10px;">
-        <button class="boton editar-btn" style="background-color: #17a2b8;" type="submit">
-            📊 Ver estadísticas del closet
-        </button>
-    </form>
+
+    <!-- Botón Ver Closets Publicados -->
+    <button class="boton editar-btn" style="background-color: #17a2b8;" onclick="mostrarModalClosets()">
+        👕 Ver closet
+    </button>
 
     <!-- Botón Regresar -->
     <a class="boton regresar-btn" href="home.jsp">Regresar</a>
@@ -165,21 +169,68 @@
         <h2>Editar Perfil</h2>
         <form action="editar-perfil" method="post">
             <input type="hidden" name="cedula" value="<%= usuario.getCedula() %>">
-            <input type="text" name="nombre" value="<%= usuario.getNombre() %>" placeholder="Nuevo Nombre" required><br>
-            <input type="email" name="email" value="<%= usuario.getEmail() %>" placeholder="Nuevo Email" required><br>
-            <input type="password" name="password" placeholder="Nueva Contraseña" required><br>
+
+            <input type="text" name="nombre" placeholder="Nuevo Nombre">
+            <input type="email" name="email" placeholder="Nuevo Email">
+            <input type="password" name="password" placeholder="Nueva Contraseña">
+
+            <p style="font-size: 14px; color: #777">Puedes dejar en blanco los campos que no desees modificar.</p>
+
             <button type="submit">Guardar Cambios</button>
-            <button type="button" class="modal-cancelar" onclick="cerrarModal()">Cancelar</button>
+            <button type="button" class="modal-cancelar" onclick="cerrarModal('modalEditarPerfil')">Cancelar</button>
         </form>
+
+    </div>
+</div>
+<!-- Modal Ver Closets Publicados -->
+<div id="modalClosetsPublicados" class="modal" style="display: none; justify-content: center; align-items: center;">
+    <div class="modal-contenido" style="max-height: 80vh; overflow-y: auto; width: 600px; text-align: left; position: relative;">
+        <span class="close" onclick="cerrarModal('modalClosetsPublicados')" style="position: absolute; top: 10px; right: 20px; font-size: 28px;">&times;</span>
+        <%
+            EntityManager em3 = JpaUtil.getEntityManagerFactory().createEntityManager();
+            List<org.apptrueque.model.Closet> closets = em3.createQuery(
+                            "SELECT c FROM Closet c LEFT JOIN FETCH c.prendas WHERE c.usuario.cedula = :cedula AND c.publicado = true",
+                            org.apptrueque.model.Closet.class)
+                    .setParameter("cedula", usuario.getCedula())
+                    .getResultList();
+
+            if (closets.isEmpty()) {
+        %>
+        <h3 style="text-align: center; color: #777; margin-top: 40px;">⚠️ Aún no has publicado tu closet.</h3>
+        <%
+        } else {
+        %>
+        <h2 style="text-align: center; color: #333;">👕 Tu closet</h2>
+        <% for (org.apptrueque.model.Closet closet : closets) { %>
+        <div style="border: 1px solid #ccc; margin-bottom: 20px; padding: 15px; border-radius: 8px; background-color: #f9f9f9;">
+            <h4 style="margin: 0 0 10px;">🧳 ID Closet: <%= closet.getIdCloset() %></h4>
+            <ul style="padding-left: 20px;">
+                <% for (org.apptrueque.model.Prenda prenda : closet.getPrendas()) { %>
+                <li><strong><%= prenda.getNombre() %></strong> – <%= prenda.getDescripcion() %></li>
+                <% } %>
+            </ul>
+            <form method="POST" action="DespublicarClosetServlet" style="text-align: right;">
+                <input type="hidden" name="idCloset" value="<%= closet.getIdCloset() %>">
+                <button type="submit" class="boton editar-btn" style="background-color: #dc3545;">❌ Quitar publicación</button>
+            </form>
+        </div>
+        <% } } em3.close(); %>
     </div>
 </div>
 
+
+
 <script>
-    function abrirModal() {
-        document.getElementById('modalEditarPerfil').style.display = 'flex';
+    function abrirModal(id) {
+        document.getElementById(id).style.display = 'flex';
     }
-    function cerrarModal() {
-        document.getElementById('modalEditarPerfil').style.display = 'none';
+
+    function cerrarModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function mostrarModalClosets() {
+        abrirModal('modalClosetsPublicados');
     }
 </script>
 

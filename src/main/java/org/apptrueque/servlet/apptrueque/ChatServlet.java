@@ -22,6 +22,6 @@ public class ChatServlet extends HttpServlet {
         org.apptrueque.model.Usuario usuario = (org.apptrueque.model.Usuario) session.getAttribute("usuario");
 
         // Redirige al JSP con el email como parámetro
-        response.sendRedirect("mensajeria.jsp?usuario=" + usuario.getEmail());
+        response.sendRedirect("chat.jsp?usuario=" + usuario.getEmail());
     }
 }

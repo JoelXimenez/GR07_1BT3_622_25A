@@ -46,7 +46,9 @@ public class LoginServlet extends HttpServlet {
     private void iniciarSesion(HttpServletRequest request, Usuario usuario) {
         HttpSession session = request.getSession(true);
         session.setAttribute("usuario", usuario);
+        session.setAttribute("usuarioEmail", usuario.getEmail()); // ← Esta línea es clave
     }
+
 
     private void mostrarError(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String errorMessage = "Credenciales incorrectas. Intenta de nuevo.";

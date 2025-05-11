@@ -39,26 +39,37 @@ public class EditarPerfilServlet extends HttpServlet {
 
             Usuario usuarioBD = em.find(Usuario.class, nuevosDatos.getCedula());
             if (usuarioBD != null) {
-                usuarioBD.setNombre(nuevosDatos.getNombre());
-                usuarioBD.setEmail(nuevosDatos.getEmail());
-                usuarioBD.setPassword(nuevosDatos.getPassword());
+                // Solo actualiza los campos que no estén vacíos
+                if (nuevosDatos.getNombre() != null && !nuevosDatos.getNombre().trim().isEmpty()) {
+                    usuarioBD.setNombre(nuevosDatos.getNombre());
+                }
+
+                if (nuevosDatos.getEmail() != null && !nuevosDatos.getEmail().trim().isEmpty()) {
+                    usuarioBD.setEmail(nuevosDatos.getEmail());
+                }
+
+                if (nuevosDatos.getPassword() != null && !nuevosDatos.getPassword().trim().isEmpty()) {
+                    usuarioBD.setPassword(nuevosDatos.getPassword());
+                }
 
                 em.merge(usuarioBD);
                 em.getTransaction().commit();
 
+                // Refresca el usuario en sesión
                 request.getSession().setAttribute("usuario", usuarioBD);
             }
 
-            response.sendRedirect("perfil.jsp");
+            response.sendRedirect("perfil.jsp"); // Asegúrate que este es el JSP correcto
         } catch (Exception e) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             e.printStackTrace();
-            response.sendRedirect("error.jsp");
+            response.sendRedirect("login.jsp");
         } finally {
             if (em != null) em.close();
         }
     }
+
 }
 

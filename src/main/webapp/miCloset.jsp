@@ -4,10 +4,23 @@
 <%@ page import="jakarta.persistence.TypedQuery" %>
 <%@ page import="org.apptrueque.util.JpaUtil" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.apptrueque.model.Usuario" %>
+<%
+    Usuario usuario = (Usuario) session.getAttribute("usuario");
+    if (usuario == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
+%>
+
+
 <%
     EntityManager em = JpaUtil.getEntityManagerFactory().createEntityManager();
-    TypedQuery<Prenda> query = em.createQuery("SELECT p FROM Prenda p", Prenda.class);
+    TypedQuery<Prenda> query = em.createQuery(
+            "SELECT p FROM Prenda p WHERE p.closet.usuario.cedula = :cedula", Prenda.class);
+    query.setParameter("cedula", usuario.getCedula());
     List<Prenda> prendas = query.getResultList();
+
     em.close();
 %>
 
@@ -159,6 +172,9 @@
             <input type="hidden" name="id" id="eliminarId">
             <button class="btn btn-rojo" type="submit"><i class="fas fa-trash"></i> Eliminar Prenda</button>
         </form>
+        <form method="POST" action="PublicarClosetServlet">
+            <button class="btn btn-verde" type="submit"><i class="fas fa-upload"></i> Publicar Closet</button>
+        </form>
         <a href="home.jsp" class="btn btn-rojo"><i class="fas fa-home"></i> Regresar</a>
     </div>
 
@@ -297,6 +313,19 @@
         }
     }
 </script>
+<%
+    String mensaje = (String) session.getAttribute("mensajePublicacion");
+    if (mensaje != null) {
+        session.removeAttribute("mensajePublicacion"); // limpiar después de mostrar
+%>
+<div id="modalMensaje" class="modal" style="display: block;">
+    <div class="modal-content" style="width: 400px;">
+        <span class="close" onclick="document.getElementById('modalMensaje').style.display='none'">&times;</span>
+        <h3 style="color: #333;"><%= mensaje %></h3>
+        <button class="btn btn-verde" onclick="document.getElementById('modalMensaje').style.display='none'">Aceptar</button>
+    </div>
+</div>
+<% } %>
 </body>
 </html>
 

@@ -94,4 +94,6 @@ class PublicacionTest {
         Publicacion p2 = new Publicacion(new Usuario(), new Closet());
         assertThat(p1.getId()).isNotEqualTo(p2.getId());
     }
+
+
 }

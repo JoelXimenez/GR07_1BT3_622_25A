@@ -36,9 +36,6 @@ public class Closet {
         return idCloset;
     }
 
-    public void setIdCloset(Long idCloset) {
-        this.idCloset = idCloset;
-    }
 
     public Usuario getUsuario() {
         return usuario;
@@ -52,15 +49,15 @@ public class Closet {
         return prendas;
     }
 
-    public void setPrendas(List<Prenda> prendas) {
-        this.prendas = prendas;
-    }
-
     public boolean isPublicado() {
         return publicado;
     }
 
     public void setPublicado(boolean publicado) {
         this.publicado = publicado;
+    }
+
+    public void agregarPrenda(Prenda p1) {
+
     }
 }
