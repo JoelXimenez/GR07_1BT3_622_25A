@@ -1,12 +1,12 @@
-import org.apptrueque.model.Closet;
-import org.apptrueque.model.Prenda;
-import org.apptrueque.model.Publicacion;
-import org.apptrueque.model.Usuario;
+import org.apptrueque.model.*;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.assertj.core.api.Assertions.*;
-
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 class PublicacionTest {
 
     // Test 1: Devuelve lista vacía si no hay publicaciones
@@ -93,6 +93,55 @@ class PublicacionTest {
         Publicacion p2 = new Publicacion(new Usuario(), new Closet());
         assertThat(p1.getId()).isNotEqualTo(p2.getId());
     }
+    // Test 9 Mock: Notifica al autor cuando otro usuario comenta
+    @Test
+    void givenComentarioDeOtroUsuario_whenAgregarComentario_thenNotificaAlAutor() {
+        NotificacionService mockService = mock(NotificacionService.class);
+        Usuario autor = new Usuario("1", "Carlos", "carlos@email.com", "pass");
+        Closet closet = new Closet();
+        Publicacion publicacion = new Publicacion(autor, closet);
+        publicacion.setNotificacionService(mockService);
 
+        publicacion.agregarComentario("Interesado!", "Ana");
+
+        verify(mockService).notificar("Nuevo comentario en tu publicación", "Carlos");
+    }
+
+    // Test 10: No notifica si el autor comenta
+    @Test
+    void givenComentarioDelMismoAutor_whenAgregarComentario_thenNoNotifica() {
+        NotificacionService mockService = mock(NotificacionService.class);
+        Usuario autor = new Usuario("1", "Carlos", "carlos@email.com", "pass");
+        Publicacion publicacion = new Publicacion(autor, new Closet());
+        publicacion.setNotificacionService(mockService);
+
+        publicacion.agregarComentario("Hola", "Carlos");
+
+        verify(mockService, never()).notificar(anyString(), anyString());
+    }
+
+    // Test 11: Retorna true para estados activos (con diferentes mayúsculas)
+    @ParameterizedTest
+    @ValueSource(strings = {"activa", "ACTIVA", "Activa"})
+    void givenEstadosActivos_whenVerificarEstado_thenRetornaTrue(String estado) {
+        Usuario autor = new Usuario("1", "Carlos", "carlos@email.com", "pass");
+        Closet closet = new Closet();
+        Publicacion publicacion = new Publicacion(autor, closet);
+        publicacion.setEstado(estado);
+
+        assertThat(publicacion.estaActiva()).isTrue();
+    }
+
+    // Test 12: Retorna false para estados no activos
+    @ParameterizedTest
+    @ValueSource(strings = {"inactiva", "pendiente", "Ya intercambiada"})
+    void givenEstadosNoActivos_whenVerificarEstado_thenRetornaFalse(String estado) {
+        Usuario autor = new Usuario("1", "Carlos", "carlos@email.com", "pass");
+        Closet closet = new Closet();
+        Publicacion publicacion = new Publicacion(autor, closet);
+        publicacion.setEstado(estado);
+
+        assertThat(publicacion.estaActiva()).isFalse();
+    }
 
 }

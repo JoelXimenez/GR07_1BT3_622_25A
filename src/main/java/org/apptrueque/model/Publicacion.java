@@ -10,6 +10,9 @@ public class Publicacion {
     private Closet closet;
     private boolean activa;
     private LocalDateTime fechaPublicacion;
+    private NotificacionService notificacionService;
+    private Usuario autor;
+    private String estado;
 
     public Publicacion(Usuario usuario, Closet closet) {
         this.id = UUID.randomUUID().toString(); // Prueba 8
@@ -67,6 +70,26 @@ public class Publicacion {
                 .filter(p -> p.getCategoria().equalsIgnoreCase(categoria))
                 .collect(Collectors.toList());
     }
+    // Métodos añadidos para los tests de Mock y Parámetros
+
+    public void setNotificacionService(NotificacionService service) {
+        this.notificacionService = service;
+    }
+
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+    public void agregarComentario(String comentario, String autorComentario) {
+        if (notificacionService != null) { // Elimina la comparación
+            notificacionService.notificar("Nuevo comentario...", this.autor.getNombre());
+        }
+    }
+
+    public boolean estaActiva() {
+        return !"activa".equalsIgnoreCase(this.estado); // Retorna TRUE para estados NO activos y FALSE para activos}
+    }
+
 
     // ----- Getters -----
     public String getId() { return id; } // Prueba 8
