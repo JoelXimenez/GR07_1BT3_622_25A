@@ -1,16 +1,12 @@
 package org.apptrueque.servlet.apptrueque;
 
-import jakarta.persistence.EntityManager;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import org.apptrueque.model.Closet;
-import org.apptrueque.model.Prenda;
-import org.apptrueque.model.Usuario;
+import jakarta.servlet.annotation.*;
+import org.apptrueque.model.*;
 import org.apptrueque.util.JpaUtil;
-
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/PublicarClosetServlet")
 public class PublicarClosetServlet extends HttpServlet {
@@ -18,11 +14,11 @@ public class PublicarClosetServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
+        HttpSession session = request.getSession();
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
         if (usuario == null) {
-            response.sendRedirect("miCloset.jsp");
+            response.sendRedirect("home.jsp");
             return;
         }
 
@@ -32,38 +28,28 @@ public class PublicarClosetServlet extends HttpServlet {
         try {
             em.getTransaction().begin();
 
+            // Recargar usuario y closet desde BD
             usuario = em.find(Usuario.class, usuario.getCedula());
             Closet closet = usuario.getClosetActual();
 
-            List<Prenda> prendas = em.createQuery(
-                            "SELECT p FROM Prenda p WHERE p.closet.idCloset = :idCloset", Prenda.class)
-                    .setParameter("idCloset", closet.getIdCloset())
-                    .getResultList();
-
-            int cantidad = prendas.size();
-
-            if (cantidad >= 3 && cantidad <= 10) {
+            // Validar publicación usando lógica del modelo (Prueba 3 y 4 implícitas)
+            if (closet.getPrendas().size() >= 3 && closet.getPrendas().size() <= 10) {
                 closet.setPublicado(true);
                 em.merge(closet);
-                mensaje = "¡Closet publicado exitosamente con " + cantidad + " prendas!";
+                mensaje = "¡Closet publicado con éxito!";
             } else {
-                mensaje = "El closet debe tener entre 3 y 10 prendas para ser publicado. Actualmente tiene " + cantidad + ".";
+                mensaje = "El closet debe tener entre 3 y 10 prendas.";
             }
 
             em.getTransaction().commit();
-            session.setAttribute("usuario", usuario);
-            session.setAttribute("mensajePublicacion", mensaje);
-
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            e.printStackTrace();
-            session.setAttribute("mensajePublicacion", "Error al publicar el closet.");
+            mensaje = "Error al publicar el closet: " + e.getMessage();
         } finally {
             em.close();
         }
 
+        session.setAttribute("mensaje", mensaje);
         response.sendRedirect("miCloset.jsp");
     }
 }
-
-

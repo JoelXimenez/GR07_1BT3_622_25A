@@ -1,12 +1,11 @@
 package org.apptrueque.servlet.apptrueque;
 
-import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import jakarta.servlet.ServletException;
-import jakarta.persistence.EntityManager;
-import org.apptrueque.model.Closet;
+import jakarta.servlet.annotation.*;
+import org.apptrueque.model.*;
 import org.apptrueque.util.JpaUtil;
-
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
 
 @WebServlet("/DespublicarClosetServlet")
@@ -16,16 +15,17 @@ public class DespublicarClosetServlet extends HttpServlet {
             throws ServletException, IOException {
 
         Long idCloset = Long.parseLong(request.getParameter("idCloset"));
-
         EntityManager em = JpaUtil.getEntityManagerFactory().createEntityManager();
 
         try {
             em.getTransaction().begin();
             Closet closet = em.find(Closet.class, idCloset);
+
             if (closet != null) {
-                closet.setPublicado(false);
+                closet.setPublicado(false); // Despublicar
                 em.merge(closet);
             }
+
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
@@ -34,6 +34,6 @@ public class DespublicarClosetServlet extends HttpServlet {
             em.close();
         }
 
-        response.sendRedirect("perfil.jsp"); // ajusta si el nombre es distinto
+        response.sendRedirect("perfil.jsp");
     }
 }
