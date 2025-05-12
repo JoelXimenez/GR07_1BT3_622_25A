@@ -17,6 +17,7 @@ public class Publicacion {
     public Publicacion(Usuario usuario, Closet closet) {
         this.id = UUID.randomUUID().toString(); // Prueba 8
         this.usuario = usuario;
+        this.autor = usuario;
         this.closet = closet;
         this.activa = true; // Prueba 2
         this.fechaPublicacion = LocalDateTime.now();
@@ -81,13 +82,15 @@ public class Publicacion {
         this.estado = estado;
     }
     public void agregarComentario(String comentario, String autorComentario) {
-        if (notificacionService != null) { // Elimina la comparación
-            notificacionService.notificar("Nuevo comentario...", this.autor.getNombre());
+        // Valida que el autor del comentario NO sea el mismo que el autor de la publicación
+        if (notificacionService != null && !autorComentario.equals(this.autor.getNombre())) {
+            notificacionService.notificar("Nuevo comentario en tu publicación", this.autor.getNombre());
         }
     }
 
+    // 3. Invierte la lógica en estaActiva()
     public boolean estaActiva() {
-        return !"activa".equalsIgnoreCase(this.estado); // Retorna TRUE para estados NO activos y FALSE para activos}
+        return "activa".equalsIgnoreCase(this.estado);
     }
 
 

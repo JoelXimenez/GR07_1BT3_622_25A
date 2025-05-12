@@ -93,6 +93,7 @@ class PublicacionTest {
         Publicacion p2 = new Publicacion(new Usuario(), new Closet());
         assertThat(p1.getId()).isNotEqualTo(p2.getId());
     }
+
     // Test 9 Mock: Notifica al autor cuando otro usuario comenta
     @Test
     void givenComentarioDeOtroUsuario_whenAgregarComentario_thenNotificaAlAutor() {
