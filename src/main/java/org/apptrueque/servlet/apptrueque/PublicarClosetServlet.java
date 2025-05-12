@@ -10,6 +10,7 @@ import java.io.IOException;
 
 @WebServlet("/PublicarClosetServlet")
 public class PublicarClosetServlet extends HttpServlet {
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -17,14 +18,23 @@ public class PublicarClosetServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
+        // Verificar si el usuario está logueado
         if (usuario == null) {
             response.sendRedirect("home.jsp");
             return;
         }
 
+        // lamar al metodo que publica el closet y obtener el mensaje
+        String mensaje = publicarCloset(usuario);
+
+        // Establecer el mensaje en la sesión y redirigir
+        session.setAttribute("mensaje", mensaje);
+        response.sendRedirect("miCloset.jsp");
+    }
+
+    private String publicarCloset(Usuario usuario) {
         EntityManager em = JpaUtil.getEntityManagerFactory().createEntityManager();
         String mensaje;
-
         try {
             em.getTransaction().begin();
 
@@ -48,8 +58,6 @@ public class PublicarClosetServlet extends HttpServlet {
         } finally {
             em.close();
         }
-
-        session.setAttribute("mensaje", mensaje);
-        response.sendRedirect("miCloset.jsp");
+        return mensaje;
     }
 }
