@@ -12,22 +12,19 @@
         <class>org.apptrueque.model.Closet</class>
         <class>org.apptrueque.model.Mensaje</class>
 
-
         <properties>
-            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://aws-0-us-east-2.pooler.supabase.com:6543/postgres?user=postgres.njgqwaeolfosuniiffqg&amp;password=7WJKDyGAosh9loh9"/>
-            <property name="jakarta.persistence.jdbc.user" value="DigitalRonny"/>
-            <property name="jakarta.persistence.jdbc.password" value="7WJKDyGAosh9loh9"/>
-            <property name="hibernate.connection.prepareThreshold" value="0" />
+            <!-- Configuración de conexión para H2 -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:file:./db/testdb;DB_CLOSE_DELAY=-1"/>
+            <property name="jakarta.persistence.jdbc.user" value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
 
             <!-- Configuración de Hibernate -->
-            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
-            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- O "create" para crear la BD cada vez -->
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
-
         </properties>
 
     </persistence-unit>
-
 </persistence>
