@@ -171,4 +171,7 @@ public class Prenda {
     public String getImagenUrl() {
         return imagenURL;
     }
+
+    public void setIntercambiable(boolean b) {
+    }
 }
