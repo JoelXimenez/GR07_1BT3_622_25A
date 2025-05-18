@@ -94,16 +94,14 @@
         <div class="btn-container">
             <a href="miCloset.jsp" class="btn-verde"><i class="fas fa-tshirt"></i> Mi Closet</a>
             <a href="publicaciones.jsp" class="btn-verde"><i class="fas fa-bullhorn"></i> Publicaciones</a>
-            <a href="chat.jsp" class="btn-verde"><i class="fas fa-comment-dots"></i> Mensajería</a>
+            <a href="MensajeServlet" class="btn-verde"><i class="fas fa-comment-dots"></i> Mensajería</a>
             <a href="perfil.jsp" class="btn-verde"><i class="fas fa-user"></i> Mi Perfil</a>
             <a href="login.jsp" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>
         <!-- Modal -->
-        <div id="modalNotificaciones" style="display: none; position: fixed; top: 70px; left: 20px; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); padding: 20px; z-index: 1000;">
-            <h3>Notificaciones</h3>
-            <ul id="notificacionesLista">
-                <!-- Aquí se cargarán las notificaciones desde el servlet -->
-            </ul>
+        <div id="modalNotificaciones" style="display: none; position: fixed; top: 70px; left: 20px; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); padding: 20px; z-index: 1000; width: 300px;">
+            <h3 style="margin-top: 0;">Notificaciones</h3>
+            <ul id="notificacionesLista" style="list-style: none; padding-left: 0;"></ul>
             <button onclick="cerrarModal()" style="margin-top: 10px;">Cerrar</button>
         </div>
     </div>
@@ -116,9 +114,40 @@
             .then(data => {
                 const lista = document.getElementById('notificacionesLista');
                 lista.innerHTML = '';
+
+                if (data.length === 0) {
+                    lista.innerHTML = "<li style='color: #777;'>No hay notificaciones nuevas.</li>";
+                    return;
+                }
+
                 data.forEach(notif => {
                     const li = document.createElement('li');
-                    li.textContent = notif;
+                    li.style.display = 'flex';
+                    li.style.justifyContent = 'space-between';
+                    li.style.alignItems = 'center';
+                    li.style.marginBottom = '10px';
+                    li.style.border = '1px solid #ddd';
+                    li.style.borderRadius = '5px';
+                    li.style.padding = '8px';
+
+                    const link = document.createElement('a');
+                    link.href = "publicaciones.jsp?usuario=" + encodeURIComponent(notif.usuarioRemitente);
+                    link.style.textDecoration = 'none';
+                    link.style.color = '#333';
+                    link.textContent = notif.mensaje;
+                    link.style.flex = '1';
+
+                    const eliminarBtn = document.createElement('button');
+                    eliminarBtn.textContent = '❌';
+                    eliminarBtn.title = 'Eliminar notificación';
+                    eliminarBtn.style.marginLeft = '10px';
+                    eliminarBtn.style.border = 'none';
+                    eliminarBtn.style.background = 'transparent';
+                    eliminarBtn.style.cursor = 'pointer';
+                    eliminarBtn.onclick = () => eliminarNotificacion(notif.id);
+
+                    li.appendChild(link);
+                    li.appendChild(eliminarBtn);
                     lista.appendChild(li);
                 });
             });
@@ -126,6 +155,17 @@
 
     function cerrarModal() {
         document.getElementById('modalNotificaciones').style.display = 'none';
+    }
+
+    function eliminarNotificacion(id) {
+        fetch('EliminarNotificacionServlet?id=' + id) // <- método GET, más compatible
+            .then(response => {
+                if (response.ok) {
+                    abrirModal(); // recargar notificaciones
+                } else {
+                    alert('No se pudo eliminar la notificación.');
+                }
+            });
     }
 </script>
 </body>
