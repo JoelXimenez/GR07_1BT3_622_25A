@@ -3,10 +3,8 @@ package org.apptrueque.servlet.apptrueque;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
 import org.apptrueque.model.Closet;
 import org.apptrueque.model.Like;
 import org.apptrueque.model.Notificacion;
@@ -63,22 +61,7 @@ public class LikeServlet extends HttpServlet {
             List<Like> resultados = query.getResultList();
 
             if (resultados.isEmpty()) {
-                // Crear nuevo Like
-                Like nuevoLike = new Like();
-                nuevoLike.setCloset(closet);
-                nuevoLike.setUsuarioEmail(emailUsuario);
-                nuevoLike.setFecha(LocalDateTime.now());
-
-
-                em.persist(nuevoLike);
-
-                // Crear notificación
-                Notificacion noti = new Notificacion();
-                noti.setUsuarioDestino(closet.getUsuario().getEmail());  // destinatario (email)
-                noti.setUsuarioRemitente(emailUsuario);
-                noti.setMensaje(usuario.getNombre() + " dio like a tu closet publicado.");  // usa nombre
-                em.persist(noti);
-
+                processNewLike(em, closet, usuario);
             }
 
             em.getTransaction().commit();
@@ -93,4 +76,20 @@ public class LikeServlet extends HttpServlet {
 
         response.sendRedirect("publicaciones.jsp");
     }
+
+    private void processNewLike(EntityManager em, Closet closet, Usuario usuario) {
+        // Crear nuevo Like
+        Like nuevoLike = new Like();
+        nuevoLike.setCloset(closet);
+        nuevoLike.setUsuarioEmail(usuario.getEmail());
+        nuevoLike.setFecha(LocalDateTime.now());
+        em.persist(nuevoLike);
+
+        // Crear notificación
+        Notificacion noti = new Notificacion();
+        noti.setUsuarioDestino(closet.getUsuario().getEmail());  // destinatario (email)
+        noti.setUsuarioRemitente(usuario.getEmail());
+        noti.setMensaje(usuario.getNombre() + " dio like a tu closet publicado.");  // usa nombre
+        em.persist(noti);
+}
 }
