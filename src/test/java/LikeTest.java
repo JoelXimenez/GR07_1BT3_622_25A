@@ -1,8 +1,12 @@
 import org.apptrueque.model.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 
 class LikeTest {
@@ -87,5 +91,51 @@ class LikeTest {
         assertThat(like.getId()).isNull();
     }
 
+// === TESTS CON MOCKS ===
 
+    // Test 9/Mock 1: Verifica que el email del usuario que da like no es nulo
+    @Test
+    void dadoLike_cuandoSeObtieneEmail_entoncesDebeSerElEsperado() {
+        Like like = new Like();
+        like.setUsuarioEmail("test@ejemplo.com");
+        assertThat(like.getUsuarioEmail()).isEqualTo("test@ejemplo.com");
+    }
+
+    // Test 10/Mock 2: Verifica que el like se asocia al closet correctamente
+    @Test
+    void dadoLike_cuandoSeAsignaCloset_entoncesDebeCoincidir() {
+        Closet closet = new Closet();
+        Like like = new Like();
+        like.setCloset(closet);
+        assertThat(like.getCloset()).isSameAs(closet);
+    }
+
+
+    // === TESTS PARAMETRIZADOS ===
+
+    //Test 11:
+    @ParameterizedTest
+    @CsvSource({
+            "user1@test.com, user1@test.com, true",
+            "user1@test.com, user2@test.com, false"
+    })
+    void dadoUsuarioEmail_cuandoSeCompara_entoncesResultadoEsperado(String emailSeteado, String emailEsperado, boolean esperado) {
+        Like like = new Like();
+        like.setUsuarioEmail(emailSeteado);
+        boolean resultado = like.getUsuarioEmail().equals(emailEsperado);
+        assertThat(resultado).isEqualTo(esperado);
+    }
+
+    //Test 12:
+    @ParameterizedTest
+    @CsvSource({
+            "2024-01-01T10:00, true",
+            "2022-12-31T23:59, true"
+    })
+    void dadaFechaAsignada_cuandoSeConsulta_entoncesDebeCoincidir(LocalDateTime fecha, boolean esperado) {
+        Like like = new Like();
+        like.setFecha(fecha);
+        boolean resultado = fecha.equals(like.getFecha());
+        assertThat(resultado).isEqualTo(esperado);
+    }
 }

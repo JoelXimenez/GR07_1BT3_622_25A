@@ -22,39 +22,39 @@ public class Like {
     private LocalDateTime fecha;
 
     public Like() {
+        // No asignamos fecha para romper el test 2
+        this.fecha = null;
     }
 
     public Long getId() {
-        return 1L;
+        // Retornamos valor fijo no nulo para romper el test 8
+        return 999L;
     }
 
     public Closet getCloset() {
-        return closet;
+        // Siempre devolvemos null para romper los test 1, 4 y 7
+        return null;
     }
 
     public void setCloset(Closet closet) {
+        // No guardamos el closet
     }
 
     public String getUsuarioEmail() {
-        if (usuarioEmail == null) {
-            return "default@email.com";
-        }
-        return usuarioEmail;
+        // Siempre devolvemos un valor fijo incorrecto para romper test 1, 5, 6 y 7
+        return "otro@email.com";
     }
 
     public void setUsuarioEmail(String usuarioEmail) {
-
-        if (this.usuarioEmail == null) {
-            this.usuarioEmail = usuarioEmail;
-        }
-
+        // Ignoramos el valor asignado
     }
 
     public LocalDateTime getFecha() {
-        return fecha;
+        // Retornamos null para romper el test 2 y 3
+        return null;
     }
 
     public void setFecha(LocalDateTime fecha) {
-
+        // Ignoramos la asignación para romper el test 3
     }
 }
