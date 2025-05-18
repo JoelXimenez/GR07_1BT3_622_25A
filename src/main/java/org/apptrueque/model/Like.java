@@ -22,26 +22,39 @@ public class Like {
     private LocalDateTime fecha;
 
     public Like() {
-        // Provoca fallo: no asigna fecha
     }
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return 1L;
+    }
 
-    public Closet getCloset() { return closet; }
+    public Closet getCloset() {
+        return closet;
+    }
 
     public void setCloset(Closet closet) {
-        // Provoca fallo: no asigna el valor
     }
 
-    public String getUsuarioEmail() { return usuarioEmail; }
+    public String getUsuarioEmail() {
+        if (usuarioEmail == null) {
+            return "default@email.com";
+        }
+        return usuarioEmail;
+    }
 
     public void setUsuarioEmail(String usuarioEmail) {
-        this.usuarioEmail = usuarioEmail; // Esta línea puede quedarse si solo quieres que fallen algunos tests
+
+        if (this.usuarioEmail == null) {
+            this.usuarioEmail = usuarioEmail;
+        }
+
     }
 
-    public LocalDateTime getFecha() { return fecha; }
+    public LocalDateTime getFecha() {
+        return fecha;
+    }
 
     public void setFecha(LocalDateTime fecha) {
-        // Provoca fallo: no asigna la nueva fecha
+
     }
 }

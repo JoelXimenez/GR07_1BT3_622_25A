@@ -50,4 +50,42 @@ class LikeTest {
         assertThat(like.getCloset()).isSameAs(closet);
     }
 
+    // Test 5: Verifica que el usuario email puede ser cambiado después de creado
+    @Test
+    void dadoLike_cuandoSeCambiaEmail_entoncesSeActualiza() {
+        Like like = new Like();
+        like.setUsuarioEmail("original@test.com");
+        like.setUsuarioEmail("nuevo@test.com");
+
+        assertThat(like.getUsuarioEmail()).isEqualTo("nuevo@test.com");
+    }
+
+    // Test 6: Verifica que un Like no es válido si no se asigna un usuarioEmail
+    @Test
+    void dadoLikeSinUsuarioEmail_cuandoSeConsulta_entoncesRetornaNull() {
+        Like like = new Like();
+        assertThat(like.getUsuarioEmail()).isNull();
+    }
+
+
+    // Test 7: Verifica que se puede crear un like sin errores si todos los campos están correctamente asignados
+    @Test
+    void cuandoSeAsignaClosetYEmail_entoncesLikeEsValido() {
+        Closet closet = new Closet();
+        Like like = new Like();
+        like.setCloset(closet);
+        like.setUsuarioEmail("valido@test.com");
+
+        assertThat(like.getCloset()).isNotNull();
+        assertThat(like.getUsuarioEmail()).isEqualTo("valido@test.com");
+    }
+
+    // Test 8: Verifica que el ID es null al crear el objeto y se puede setear (si tuvieras un setter)
+    @Test
+    void cuandoSeCreaLike_entoncesIdEsNull() {
+        Like like = new Like();
+        assertThat(like.getId()).isNull();
+    }
+
+
 }
