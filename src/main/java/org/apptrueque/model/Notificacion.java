@@ -1,50 +1,39 @@
 package org.apptrueque.model;
 
-import java.util.Date;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
+@Entity
 public class Notificacion {
 
-    private String tipo;    // Puede ser "exito" o "error"
-    private String mensaje; // El mensaje que quieres mostrar
-    private Date fecha;     // Fecha de creación de la notificación
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // Constructor
-    public Notificacion(String tipo, String mensaje) {
-        this.tipo = tipo;
-        this.mensaje = mensaje;
-        this.fecha = new Date(); // Se asigna automáticamente la fecha actual
-    }
+    private String mensaje;
 
-    // Métodos
+    private String usuarioDestino;
 
-    public void mostrarExito(String mensaje) {
-        this.tipo = "exito";
-        this.mensaje = mensaje;
-        this.fecha = new Date();
-        System.out.println("✅ [Éxito] " + mensaje);
-    }
+    private String usuarioRemitente;
 
-    public void mostrarError(String mensaje) {
-        this.tipo = "error";
-        this.mensaje = mensaje;
-        this.fecha = new Date();
-        System.out.println("❌ [Error] " + mensaje);
-    }
-
-    public void ocultar() {
-        System.out.println("🧹 Notificación ocultada.");
-        this.mensaje = "";
-        this.tipo = "";
-    }
+    private LocalDateTime fecha = LocalDateTime.now();
 
     // Getters y Setters
-
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
+    public Long getId() { return id; }
 
     public String getMensaje() { return mensaje; }
+
     public void setMensaje(String mensaje) { this.mensaje = mensaje; }
 
-    public Date getFecha() { return fecha; }
-    public void setFecha(Date fecha) { this.fecha = fecha; }
+    public String getUsuarioDestino() { return usuarioDestino; }
+
+    public void setUsuarioDestino(String usuarioDestino) { this.usuarioDestino = usuarioDestino; }
+
+    public String getUsuarioRemitente() { return usuarioRemitente; }
+
+    public void setUsuarioRemitente(String usuarioRemitente) { this.usuarioRemitente = usuarioRemitente; }
+
+    public LocalDateTime getFecha() { return fecha; }
+
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 }

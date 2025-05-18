@@ -84,6 +84,12 @@
 <div class="container">
     <div class="home-container">
         <h1>Bienvenido a TruequeApp</h1>
+        <!-- Botón de notificaciones -->
+        <div style="position: absolute; top: 20px; left: 20px;">
+            <button onclick="abrirModal()" style="background-color: #ff9800; border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer; color: white;">
+                <i class="fas fa-bell"></i>
+            </button>
+        </div>
 
         <div class="btn-container">
             <a href="miCloset.jsp" class="btn-verde"><i class="fas fa-tshirt"></i> Mi Closet</a>
@@ -92,8 +98,35 @@
             <a href="perfil.jsp" class="btn-verde"><i class="fas fa-user"></i> Mi Perfil</a>
             <a href="login.jsp" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>
+        <!-- Modal -->
+        <div id="modalNotificaciones" style="display: none; position: fixed; top: 70px; left: 20px; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); padding: 20px; z-index: 1000;">
+            <h3>Notificaciones</h3>
+            <ul id="notificacionesLista">
+                <!-- Aquí se cargarán las notificaciones desde el servlet -->
+            </ul>
+            <button onclick="cerrarModal()" style="margin-top: 10px;">Cerrar</button>
+        </div>
     </div>
 </div>
+<script>
+    function abrirModal() {
+        document.getElementById('modalNotificaciones').style.display = 'block';
+        fetch('NotificacionesServlet')
+            .then(response => response.json())
+            .then(data => {
+                const lista = document.getElementById('notificacionesLista');
+                lista.innerHTML = '';
+                data.forEach(notif => {
+                    const li = document.createElement('li');
+                    li.textContent = notif;
+                    lista.appendChild(li);
+                });
+            });
+    }
 
+    function cerrarModal() {
+        document.getElementById('modalNotificaciones').style.display = 'none';
+    }
+</script>
 </body>
 </html>

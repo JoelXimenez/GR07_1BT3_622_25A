@@ -14,17 +14,6 @@
     ).getResultList();
     em.close();
 
-    // Aplicar filtros (usando métodos de Publicacion.java)
-    if (filtroNombre != null && !filtroNombre.isEmpty()) {
-        closets = closets.stream()
-                .filter(c -> !Publicacion.filtrarPorNombre(c, filtroNombre).isEmpty())
-                .collect(Collectors.toList());
-    }
-    if (filtroCategoria != null && !filtroCategoria.isEmpty()) {
-        closets = closets.stream()
-                .filter(c -> !Publicacion.filtrarPorCategoria(c, filtroCategoria).isEmpty())
-                .collect(Collectors.toList());
-    }
 %>
 
 <!DOCTYPE html>
@@ -99,30 +88,6 @@
 <body>
 <div class="contenedor">
     <h1>📰 Publicaciones de Closets</h1>
-
-    <!-- Sección de Filtros (nueva) -->
-    <div class="filtros">
-        <form method="get" action="publicaciones.jsp">
-            <input
-                    type="text"
-                    name="filtroNombre"
-                    placeholder="Buscar por nombre de prenda"
-                    value="<%= filtroNombre != null ? filtroNombre : "" %>"
-            >
-            <input
-                    type="text"
-                    name="filtroCategoria"
-                    placeholder="Filtrar por categoría (ej: mujer)"
-                    value="<%= filtroCategoria != null ? filtroCategoria : "" %>"
-            >
-            <button type="submit"><i class="fas fa-search"></i> Filtrar</button>
-            <% if (filtroNombre != null || filtroCategoria != null) { %>
-            <a href="publicaciones.jsp" style="margin-left: 10px; color: #666;">
-                <i class="fas fa-times"></i> Limpiar
-            </a>
-            <% } %>
-        </form>
-    </div>
 
     <!-- Listado de publicaciones -->
     <% if (closets.isEmpty()) { %>

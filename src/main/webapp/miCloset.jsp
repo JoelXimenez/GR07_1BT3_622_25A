@@ -173,8 +173,18 @@
             <button class="btn btn-rojo" type="submit"><i class="fas fa-trash"></i> Eliminar Prenda</button>
         </form>
         <form method="POST" action="PublicarClosetServlet">
+            <label for="edad">Elija la edad referente de este closet:</label>
+            <select name="edad" required>
+                <option value="" disabled selected>Seleccione edad</option>
+                <option value="Adultos">Adultos</option>
+                <option value="Jovenes">Jóvenes</option>
+                <option value="Niños">Niños</option>
+                <option value="Bebes">Bebés</option>
+                <option value="Ancianos">Ancianos</option>
+            </select>
             <button class="btn btn-verde" type="submit"><i class="fas fa-upload"></i> Publicar Closet</button>
         </form>
+
         <a href="home.jsp" class="btn btn-rojo"><i class="fas fa-home"></i> Regresar</a>
     </div>
 
@@ -219,9 +229,30 @@
         <form method="POST" action="AgregarPrendaServlet" onsubmit="return validarCampos(this)">
             <input type="text" name="nombre" placeholder="Nombre" required>
             <input type="text" name="descripcion" placeholder="Descripción" required>
-            <input type="text" name="talla" placeholder="Talla" required>
-            <input type="text" name="estado" placeholder="Estado" required>
-            <input type="text" name="categoria" placeholder="Categoría" required>
+            <select name="talla" required>
+                <option value="" disabled selected>Seleccione talla</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+            </select>
+
+            <select name="estado" required>
+                <option value="" disabled selected>Seleccione estado</option>
+                <option value="Bueno">Bueno</option>
+                <option value="Medio">Medio</option>
+                <option value="Malo">Malo</option>
+            </select>
+
+            <select name="categoria" required>
+                <option value="" disabled selected>Seleccione categoría</option>
+                <option value="Hombres">Hombres</option>
+                <option value="Mujeres">Mujeres</option>
+                <option value="Unisex">Unisex</option>
+            </select>
+
             <input type="text" name="imagenUrl" placeholder="URL de la imagen (opcional)">
             <button class="btn btn-verde" type="submit"><i class="fas fa-plus-circle"></i> Guardar</button>
             <button class="btn btn-rojo" type="button" onclick="document.getElementById('modalAgregar').style.display='none'"><i class="fas fa-times"></i> Cancelar</button>
@@ -238,9 +269,30 @@
             <input type="hidden" name="id" id="editId">
             <input type="text" name="nombre" id="editNombre" placeholder="Nombre (opcional)">
             <input type="text" name="descripcion" id="editDescripcion" placeholder="Descripción (opcional)">
-            <input type="text" name="talla" id="editTalla" placeholder="Talla (opcional)">
-            <input type="text" name="estado" id="editEstado" placeholder="Estado (opcional)">
-            <input type="text" name="categoria" id="editCategoria" placeholder="Categoría (opcional)">
+            <select name="talla" id="editTalla">
+                <option value="">(Sin cambio)</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+            </select>
+
+            <select name="estado" id="editEstado">
+                <option value="">(Sin cambio)</option>
+                <option value="Bueno">Bueno</option>
+                <option value="Medio">Medio</option>
+                <option value="Malo">Malo</option>
+            </select>
+
+            <select name="categoria" id="editCategoria">
+                <option value="">(Sin cambio)</option>
+                <option value="Hombres">Hombres</option>
+                <option value="Mujeres">Mujeres</option>
+                <option value="Unisex">Unisex</option>
+            </select>
+
             <input type="text" name="imagenUrl" id="editImagenUrl" placeholder="URL de la imagen (opcional)">
             <p style="font-size: 14px; color: #777">Deja en blanco los campos que no deseas modificar.</p>
             <button class="btn btn-verde" type="submit"><i class="fas fa-save"></i> Actualizar</button>

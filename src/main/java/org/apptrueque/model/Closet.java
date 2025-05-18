@@ -22,6 +22,10 @@ public class Closet {
     @Column(nullable = false)
     private boolean publicado;  // Campo añadido
 
+    @Column(length = 20)
+    private String edad; // Adultos, Niños, Bebes, Ancianos, Jovenes
+
+
     public Closet() {
         this.publicado = false;  // Valor predeterminado
     }
@@ -43,6 +47,14 @@ public class Closet {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public String getEdad() {
+        return edad;
+    }
+
+    public void setEdad(String edad) {
+        this.edad = edad;
     }
 
     public List<Prenda> getPrendas() {

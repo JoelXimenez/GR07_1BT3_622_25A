@@ -1,235 +1,184 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="jakarta.persistence.*" %>
-<%@ page import="org.apptrueque.model.Usuario" %>
-<%@ page import="org.apptrueque.util.JpaUtil" %>
-<%@ page import="java.util.*" %>
-<%@ page import="org.apptrueque.model.Mensaje" %>
+<%@ page import="java.util.*, org.apptrueque.model.Usuario" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%
-    String remitente = (String) session.getAttribute("usuarioEmail");
-    String destinatario = request.getParameter("destinatario");
+    Usuario usuario = (Usuario) session.getAttribute("usuario");
+    if (usuario == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
 
-    EntityManager em = JpaUtil.getEntityManagerFactory().createEntityManager();
-    List<Usuario> usuarios = em.createQuery("SELECT u FROM Usuario u WHERE u.email <> :email", Usuario.class)
-            .setParameter("email", remitente)
-            .getResultList();
-    em.close();
-    List<Mensaje> mensajes = new ArrayList<>();
-    if (destinatario != null && !destinatario.isEmpty()) {
-        EntityManager emMsg = JpaUtil.getEntityManagerFactory().createEntityManager();
-        mensajes = emMsg.createQuery("SELECT m FROM Mensaje m WHERE " +
-                        "(m.remitenteEmail = :remitente AND m.destinatarioEmail = :destinatario) OR " +
-                        "(m.remitenteEmail = :destinatario AND m.destinatarioEmail = :remitente) " +
-                        "ORDER BY m.fechaHora ASC", Mensaje.class)
-                .setParameter("remitente", remitente)
-                .setParameter("destinatario", destinatario)
-                .getResultList();
-        emMsg.close();
+    String usuarioLogueado = usuario.getEmail();
+    String receptor = (String) request.getAttribute("receptor");
+    List<Usuario> usuarios = (List<Usuario>) request.getAttribute("usuarios");
+
+    String nombreReceptor = "Selecciona un usuario";
+    if (receptor != null && usuarios != null) {
+        for (Usuario u : usuarios) {
+            if (receptor.equals(u.getEmail())) {
+                nombreReceptor = u.getNombre();
+                break;
+            }
+        }
     }
 %>
-
-%>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Chat - TruequeApp</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
         body {
+            font-family: Arial, sans-serif;
+            background-color: #ece5dd;
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #e5ddd5;
+            padding: 0;
         }
-
         .chat-container {
             display: flex;
-            height: 100vh;
-        }
-
-        .sidebar {
-            width: 300px;
-            background-color: #fff;
-            border-right: 1px solid #ccc;
-            padding: 20px;
-        }
-
-        .sidebar h2 {
-            margin-bottom: 10px;
-        }
-
-        .sidebar select {
-            width: 100%;
-            padding: 8px;
-            font-size: 16px;
-        }
-
-        .chat-main {
-            flex-grow: 1;
-            display: flex;
             flex-direction: column;
-            background: #ece5dd;
+            max-width: 700px;
+            height: 90vh;
+            margin: 30px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
         }
-
         .chat-header {
-            background-color: #075E54;
+            background-color: #075e54;
             color: white;
-            padding: 10px 20px;
+            padding: 15px;
             font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-
-        .chat-box {
-            flex-grow: 1;
+        .chat-header .left-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .btn-regresar {
+            background-color: white;
+            color: #075e54;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex: 1;
             padding: 20px;
             overflow-y: auto;
-            display: flex;
-            flex-direction: column;
+            background-color: #e5ddd5;
         }
-
-        .mensaje {
+        .message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 7px;
             max-width: 60%;
-            margin-bottom: 10px;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 15px;
-            line-height: 1.4;
+            clear: both;
+            position: relative;
         }
-
-        .mio {
-            align-self: flex-end;
+        .sent {
             background-color: #dcf8c6;
+            float: right;
         }
-
-        .otro {
-            align-self: flex-start;
+        .received {
             background-color: #fff;
+            float: left;
         }
-
-        .chat-form {
+        .timestamp {
+            font-size: 11px;
+            color: #555;
+            margin-top: 5px;
+            text-align: right;
+        }
+        .chat-input {
             display: flex;
-            padding: 10px 20px;
+            padding: 10px;
             background-color: #f0f0f0;
         }
-
-        .chat-form textarea {
-            flex-grow: 1;
-            resize: none;
+        .chat-input textarea {
+            flex: 1;
             padding: 10px;
-            border-radius: 10px;
+            resize: none;
+            border-radius: 5px;
             border: 1px solid #ccc;
         }
-
-        .chat-form button {
-            background-color: #128C7E;
-            color: white;
-            border: none;
+        .chat-input button {
             padding: 10px 20px;
             margin-left: 10px;
-            border-radius: 10px;
+            background-color: #128c7e;
+            color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
         }
-
-        .chat-form button:hover {
-            background-color: #075E54;
-        }
-
-        .volver {
-            margin-top: 20px;
-            display: block;
-            text-align: center;
-            color: #d32f2f;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .volver:hover {
-            text-decoration: underline;
+        select {
+            padding: 8px;
+            margin: 10px;
+            width: 95%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
 <body>
-
 <div class="chat-container">
-    <div class="sidebar">
-        <h2>Chatear con:</h2>
-        <form id="formDestinatario" method="get" action="chat.jsp">
-            <select name="destinatario" onchange="document.getElementById('formDestinatario').submit()">
-                <option value="">-- Selecciona usuario --</option>
-                <% for (Usuario u : usuarios) { %>
-                <option value="<%= u.getEmail() %>" <%= u.getEmail().equals(destinatario) ? "selected" : "" %>>
-                    <%= u.getNombre() %> (<%= u.getEmail() %>)
-                </option>
+    <div class="chat-header">
+        <div class="left-section">
+            <form action="home.jsp" method="get" style="margin: 0;">
+                <button class="btn-regresar" type="submit">Regresar</button>
+            </form>
+            <span><strong>Chat con:</strong> <%= nombreReceptor %></span>
+        </div>
+        <form method="get" action="MensajeServlet">
+            <select name="destinatario" onchange="this.form.submit()">
+                <option value="">-- Elige un usuario --</option>
+                <% if (usuarios != null && !usuarios.isEmpty()) {
+                    for (Usuario u : usuarios) {
+                        String selected = receptor != null && receptor.equals(u.getEmail()) ? "selected" : "";
+                %>
+                <option value="<%= u.getEmail() %>" <%= selected %>><%= u.getNombre() %></option>
+                <% } } else { %>
+                <option disabled>No hay otros usuarios registrados</option>
                 <% } %>
             </select>
         </form>
-
-        <a href="home.jsp" class="volver"><i class="fas fa-arrow-left"></i> Volver</a>
     </div>
 
-    <div class="chat-main">
-        <% if (destinatario != null && !destinatario.isEmpty()) { %>
-        <div class="chat-header">
-            Conversación con: <%= destinatario %>
-        </div>
-        <div id="chat-box" class="chat-box">
-            <% for (Mensaje m : mensajes) { %>
-            <div class="mensaje <%= m.getRemitenteEmail().equals(remitente) ? "mio" : "otro" %>">
-                <%= m.getContenido() %>
-            </div>
-            <% } %>
-        </div>
+    <% if (receptor != null) { %>
+    <div class="chat-messages" id="chatMensajes"></div>
 
-
-        <form id="form-mensaje" class="chat-form">
-            <input type="hidden" name="remitente" value="<%= remitente %>">
-            <input type="hidden" name="destinatario" value="<%= destinatario %>">
-            <textarea name="contenido" rows="2" placeholder="Escribe un mensaje..." required></textarea>
-            <button type="submit">Enviar</button>
-        </form>
-        <% } else { %>
-        <div class="chat-header">Selecciona un usuario a la izquierda</div>
-        <% } %>
-    </div>
+    <form method="post" action="MensajeServlet" class="chat-input">
+        <textarea name="contenido" rows="2" placeholder="Escribe un mensaje..." required></textarea>
+        <input type="hidden" name="destinatario" value="<%= receptor %>">
+        <button type="submit">Enviar</button>
+    </form>
+    <% } %>
 </div>
 
-<% if (destinatario != null && !destinatario.isEmpty()) { %>
 <script>
     function cargarMensajes() {
-        fetch('ObtenerMensajesServlet?remitente=<%= remitente %>&destinatario=<%= destinatario %>')
-            .then(response => response.json())
-            .then(mensajes => {
-                const chatBox = document.getElementById('chat-box');
-                chatBox.innerHTML = '';
-                mensajes.forEach(msg => {
-                    const div = document.createElement('div');
-                    div.className = 'mensaje ' + (msg.remitente === '<%= remitente %>' ? 'mio' : 'otro');
-                    div.innerHTML = msg.contenido;
-                    chatBox.appendChild(div);
-                });
+        const chatBox = document.getElementById("chatMensajes");
+        const remitente = "<%= usuarioLogueado %>";
+        const destinatario = "<%= receptor %>";
+
+        if (!destinatario) return;
+
+        fetch("MensajesAjaxServlet?remitente=" + remitente + "&destinatario=" + destinatario)
+            .then(response => response.text())
+            .then(html => {
+                chatBox.innerHTML = html;
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
     }
 
-    document.getElementById('form-mensaje').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        fetch('EnviarMensajeServlet', {
-            method: 'POST',
-            body: formData
-        }).then(() => {
-            this.contenido.value = '';
-            cargarMensajes();
-        });
-    });
-
     setInterval(cargarMensajes, 3000);
-    cargarMensajes();
+    window.onload = cargarMensajes;
 </script>
-<% } %>
-
 </body>
 </html>

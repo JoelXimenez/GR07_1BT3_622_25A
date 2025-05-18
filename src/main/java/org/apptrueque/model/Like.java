@@ -4,63 +4,37 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "likes")
 public class Like {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    private Usuario usuario;
-
-    @ManyToOne
+    @JoinColumn(name = "id_closet", nullable = false)
     private Closet closet;
 
+    @Column(name = "usuario_email", nullable = false)
+    private String usuarioEmail;
+
+    @Column(nullable = false)
     private LocalDateTime fecha;
-    private boolean activo;
 
-    // Constructor vacío requerido por JPA
+
     public Like() {
+        this.fecha = LocalDateTime.now();
     }
 
-    // Constructor principal (deberá implementar validaciones)
-    public Like(Usuario usuario, Closet closet) {
-        throw new UnsupportedOperationException("No implementado aún");
-    }
+    // Getters y setters
+    public Long getId() { return id; }
 
-    // Constructor con servicio de notificaciones
-    public Like(Usuario usuario, Closet closet, NotificacionService notificacionService) {
-        throw new UnsupportedOperationException("No implementado aún");
-    }
+    public Closet getCloset() { return closet; }
+    public void setCloset(Closet closet) { this.closet = closet; }
 
-    // Método para quitar like
-    public boolean quitar() {
-        throw new UnsupportedOperationException("No implementado aún");
-    }
+    public String getUsuarioEmail() { return usuarioEmail; }
+    public void setUsuarioEmail(String usuarioEmail) { this.usuarioEmail = usuarioEmail; }
 
-    // Método para verificar estado
-    public boolean isActivo() {
-        throw new UnsupportedOperationException("No implementado aún");
-    }
-
-    // Método estático para verificar compatibilidad de prendas
-    public static boolean sonPrendasCompatibles(Prenda prenda1, Prenda prenda2) {
-        throw new UnsupportedOperationException("No implementado aún");
-    }
-
-    // Getters básicos
-    public Long getId() {
-        throw new UnsupportedOperationException("No implementado aún");
-    }
-
-    public Usuario getUsuario() {
-        throw new UnsupportedOperationException("No implementado aún");
-    }
-
-    public Closet getCloset() {
-        throw new UnsupportedOperationException("No implementado aún");
-    }
-
-    public LocalDateTime getFecha() {
-        throw new UnsupportedOperationException("No implementado aún");
-    }
+    public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 }

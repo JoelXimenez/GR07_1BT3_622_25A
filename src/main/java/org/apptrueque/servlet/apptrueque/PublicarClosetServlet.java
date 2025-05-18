@@ -1,63 +1,71 @@
 package org.apptrueque.servlet.apptrueque;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
-import org.apptrueque.model.*;
-import org.apptrueque.util.JpaUtil;
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import org.apptrueque.model.Closet;
+import org.apptrueque.model.Prenda;
+import org.apptrueque.model.Usuario;
+import org.apptrueque.util.JpaUtil;
+
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/PublicarClosetServlet")
 public class PublicarClosetServlet extends HttpServlet {
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(false);
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
-        // Verificar si el usuario está logueado
         if (usuario == null) {
-            response.sendRedirect("home.jsp");
+            response.sendRedirect("miCloset.jsp");
             return;
         }
 
-        // lamar al metodo que publica el closet y obtener el mensaje
-        String mensaje = publicarCloset(usuario);
+        // ✅ Aquí recuperamos el valor del selector
+        String edad = request.getParameter("edad");
 
-        // Establecer el mensaje en la sesión y redirigir
-        session.setAttribute("mensaje", mensaje);
-        response.sendRedirect("miCloset.jsp");
-    }
-
-    private String publicarCloset(Usuario usuario) {
         EntityManager em = JpaUtil.getEntityManagerFactory().createEntityManager();
         String mensaje;
+
         try {
             em.getTransaction().begin();
 
-            // Recargar usuario y closet desde BD
             usuario = em.find(Usuario.class, usuario.getCedula());
             Closet closet = usuario.getClosetActual();
 
-            // Validar publicación usando lógica del modelo (Prueba 3 y 4 implícitas)
-            if (closet.getPrendas().size() >= 3 && closet.getPrendas().size() <= 10) {
+            List<Prenda> prendas = em.createQuery(
+                            "SELECT p FROM Prenda p WHERE p.closet.idCloset = :idCloset", Prenda.class)
+                    .setParameter("idCloset", closet.getIdCloset())
+                    .getResultList();
+
+            int cantidad = prendas.size();
+
+            if (cantidad >= 3 && cantidad <= 10) {
                 closet.setPublicado(true);
+                closet.setEdad(edad);  // ✅ ahora edad no es null
                 em.merge(closet);
-                mensaje = "¡Closet publicado con éxito!";
+                mensaje = "¡Closet publicado exitosamente con " + cantidad + " prendas!";
             } else {
-                mensaje = "El closet debe tener entre 3 y 10 prendas.";
+                mensaje = "El closet debe tener entre 3 y 10 prendas para ser publicado. Actualmente tiene " + cantidad + ".";
             }
 
             em.getTransaction().commit();
+            session.setAttribute("usuario", usuario);
+            session.setAttribute("mensajePublicacion", mensaje);
+
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
-            mensaje = "Error al publicar el closet: " + e.getMessage();
+            e.printStackTrace();
+            session.setAttribute("mensajePublicacion", "Error al publicar el closet.");
         } finally {
             em.close();
         }
-        return mensaje;
+
+        response.sendRedirect("miCloset.jsp");
     }
 }

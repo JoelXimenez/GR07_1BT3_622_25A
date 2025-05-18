@@ -203,12 +203,20 @@
         <h2 style="text-align: center; color: #333;">👕 Tu closet</h2>
         <% for (org.apptrueque.model.Closet closet : closets) { %>
         <div style="border: 1px solid #ccc; margin-bottom: 20px; padding: 15px; border-radius: 8px; background-color: #f9f9f9;">
-            <h4 style="margin: 0 0 10px;">🧳 ID Closet: <%= closet.getIdCloset() %></h4>
-            <ul style="padding-left: 20px;">
-                <% for (org.apptrueque.model.Prenda prenda : closet.getPrendas()) { %>
-                <li><strong><%= prenda.getNombre() %></strong> – <%= prenda.getDescripcion() %></li>
+            <h4 style="margin-bottom: 5px;">👥 Closet para: <%= closet.getEdad() != null ? closet.getEdad() : "No especificado" %></h4>
+
+            <% for (org.apptrueque.model.Prenda prenda : closet.getPrendas()) { %>
+            <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 6px; background: #fff;">
+                <p><strong>👕 Nombre:</strong> <%= prenda.getNombre() %></p>
+                <p><strong>📝 Descripción:</strong> <%= prenda.getDescripcion() %></p>
+                <p><strong>📏 Talla:</strong> <%= prenda.getTalla() %></p>
+                <p><strong>⚙️ Estado:</strong> <%= prenda.getEstado() %></p>
+                <p><strong>🧬 Categoría:</strong> <%= prenda.getCategoria() %></p>
+                <% if (prenda.getImagenUrl() != null && !prenda.getImagenUrl().isEmpty()) { %>
+                <img src="<%= prenda.getImagenUrl() %>" alt="Imagen prenda" style="max-width: 100px; border-radius: 8px; margin-top: 5px;">
                 <% } %>
-            </ul>
+            </div>
+            <% } %>
             <form method="POST" action="DespublicarClosetServlet" style="text-align: right;">
                 <input type="hidden" name="idCloset" value="<%= closet.getIdCloset() %>">
                 <button type="submit" class="boton editar-btn" style="background-color: #dc3545;">❌ Quitar publicación</button>
