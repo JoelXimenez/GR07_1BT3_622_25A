@@ -21,20 +21,27 @@ public class Like {
     @Column(nullable = false)
     private LocalDateTime fecha;
 
-
     public Like() {
-        this.fecha = LocalDateTime.now();
+        // Provoca fallo: no asigna fecha
     }
 
-    // Getters y setters
     public Long getId() { return id; }
 
     public Closet getCloset() { return closet; }
-    public void setCloset(Closet closet) { this.closet = closet; }
+
+    public void setCloset(Closet closet) {
+        // Provoca fallo: no asigna el valor
+    }
 
     public String getUsuarioEmail() { return usuarioEmail; }
-    public void setUsuarioEmail(String usuarioEmail) { this.usuarioEmail = usuarioEmail; }
+
+    public void setUsuarioEmail(String usuarioEmail) {
+        this.usuarioEmail = usuarioEmail; // Esta línea puede quedarse si solo quieres que fallen algunos tests
+    }
 
     public LocalDateTime getFecha() { return fecha; }
-    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+
+    public void setFecha(LocalDateTime fecha) {
+        // Provoca fallo: no asigna la nueva fecha
+    }
 }
