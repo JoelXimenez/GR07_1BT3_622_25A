@@ -8,7 +8,11 @@
     }
 
     String usuarioLogueado = usuario.getEmail();
-    String receptor = (String) request.getAttribute("receptor");
+    String receptor = request.getParameter("usuario");
+    if (receptor == null) {
+        receptor = request.getParameter("destinatario"); // compatibilidad con selección del <select>
+    }
+
     List<Usuario> usuarios = (List<Usuario>) request.getAttribute("usuarios");
 
     String nombreReceptor = "Selecciona un usuario";
