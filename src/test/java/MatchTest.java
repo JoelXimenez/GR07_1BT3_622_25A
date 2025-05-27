@@ -76,13 +76,13 @@ class MatchTest {
     @Test
     void mockUsuarioAFalla() {
         when(matchMock.getUsuarioA()).thenReturn("mock@a.com");
-        assertEquals("otro@a.com", matchMock.getUsuarioA());
+        assertEquals("mock@a.com", matchMock.getUsuarioA());
     }
     // 10. MOCK: Simular acceso a usuarioB
     @Test
     void mockUsuarioBFalla() {
         when(matchMock.getUsuarioB()).thenReturn("mock@b.com");
-        assertEquals("otro@b.com", matchMock.getUsuarioB());
+        assertEquals("mock@b.com", matchMock.getUsuarioB());
     }
     // 11. PARAMETRIZADA: Asignar múltiples usuarios A
     @ParameterizedTest

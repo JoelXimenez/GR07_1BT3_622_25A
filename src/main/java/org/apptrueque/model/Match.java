@@ -5,29 +5,35 @@ import java.time.LocalDateTime;
 public class Match {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id = 1L;
-    private String usuarioA = "usuario";
-    private String usuarioB = "otroUsuario";
-    private LocalDateTime fechaMatch;
+    private Long id;
+    private String usuarioA;
+    private String usuarioB;
+    private LocalDateTime fechaMatch = LocalDateTime.now();
     public Long getId() {
         return id;
     }
+
     public String getUsuarioA() {
-        return "valorIncorrecto";
+        return usuarioA;
     }
+
     public void setUsuarioA(String usuarioA) {
-        this.usuarioA = "ignorado";
+        this.usuarioA = usuarioA;
     }
+
     public String getUsuarioB() {
-        return "valorIncorrecto";
+        return usuarioB;
     }
+
     public void setUsuarioB(String usuarioB) {
-        this.usuarioB = "ignorado";
+        this.usuarioB = usuarioB;
     }
+
     public LocalDateTime getFechaMatch() {
         return fechaMatch;
     }
+
     public void setFechaMatch(LocalDateTime fechaMatch) {
-        this.fechaMatch = fechaMatch.plusDays(1);
+        this.fechaMatch = fechaMatch;
     }
 }
