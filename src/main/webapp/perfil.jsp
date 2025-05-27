@@ -6,6 +6,7 @@
 <%@ page import="org.apptrueque.util.JpaUtil" %>
 <%@ page import="org.apptrueque.model.Closet" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.apptrueque.model.Match" %>
 
 <%
     Usuario usuario = (Usuario) session.getAttribute("usuario");
@@ -98,6 +99,7 @@
             text-align: center;
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             animation: aparecer 0.5s ease;
+            position: relative;
         }
         @keyframes aparecer {
             from { opacity: 0; transform: scale(0.8);}
@@ -157,6 +159,11 @@
     <!-- Botón Ver Closets Publicados -->
     <button class="boton editar-btn" style="background-color: #17a2b8;" onclick="mostrarModalClosets()">
         👕 Ver closet
+    </button>
+
+    <!-- Botón Ver Matches -->
+    <button class="boton editar-btn" style="background-color: #ffc107;" onclick="mostrarModalMatches()">
+        💖 Ver Matches
     </button>
 
     <!-- Botón Regresar -->
@@ -226,6 +233,50 @@
     </div>
 </div>
 
+<!-- Modal Ver Matches -->
+<div id="modalMatches" class="modal" style="display: none; justify-content: center; align-items: center;">
+    <div class="modal-contenido">
+        <span class="close" onclick="cerrarModal('modalMatches')"
+              style="position: absolute; top: 10px; right: 10px; font-size: 22px; cursor: pointer; background: none; border: none;">
+    &times;
+</span>
+
+        <h2 style="text-align: center;">💘 Tus Matches</h2>
+        <ul>
+            <%
+                EntityManager em4 = JpaUtil.getEntityManagerFactory().createEntityManager();
+                List<Match> matches = em4.createQuery("SELECT m FROM Match m WHERE m.usuarioA = :email OR m.usuarioB = :email ORDER BY m.fechaMatch DESC", Match.class)
+                        .setParameter("email", usuario.getEmail()).getResultList();
+                if (matches.isEmpty()) {
+            %>
+            <p style="text-align: center; color: #777;">⚠️ Aún no has hecho match con ningún usuario.</p>
+            <%
+            } else {
+                for (Match m : matches) {
+                    String emailOtro = m.getUsuarioA().equals(usuario.getEmail()) ? m.getUsuarioB() : m.getUsuarioA();
+                    Usuario otroUsuario = null;
+                    try {
+                        otroUsuario = em4.createQuery("SELECT u FROM Usuario u WHERE u.email = :email", Usuario.class)
+                                .setParameter("email", emailOtro).getSingleResult();
+                    } catch (Exception e) {}
+                    String nombre = (otroUsuario != null) ? otroUsuario.getNombre() : emailOtro;
+            %>
+            <li style="margin-bottom: 12px;">
+                <strong>Haz hecho match con:</strong>
+                <a href="MensajeServlet?destinatario=<%= emailOtro %>" style="color: #007bff; text-decoration: none;">
+                    <%= nombre %>
+                </a><br>
+                <small>📅 Fecha: <%= formatoFecha.format(java.sql.Timestamp.valueOf(m.getFechaMatch())) %></small>
+            </li>
+            <%
+                    }
+                }
+                em4.close();
+            %>
+        </ul>
+    </div>
+</div>
+
 
 
 <script>
@@ -237,10 +288,15 @@
         document.getElementById(id).style.display = 'none';
     }
 
+    function mostrarModalMatches() {
+        abrirModal('modalMatches');
+    }
+
     function mostrarModalClosets() {
         abrirModal('modalClosetsPublicados');
     }
 </script>
+
 
 </body>
 </html>
