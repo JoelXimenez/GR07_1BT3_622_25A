@@ -42,7 +42,6 @@
             gap: 15px;
         }
 
-        /* Estilo general para todos los botones */
         .btn-container a {
             text-decoration: none;
             color: white;
@@ -56,7 +55,6 @@
             transition: background-color 0.3s ease;
         }
 
-        /* Botones normales (verde) */
         .btn-verde {
             background-color: #4CAF50;
         }
@@ -65,7 +63,6 @@
             background-color: #45a049;
         }
 
-        /* Botón especial de cerrar sesión (rojo) */
         .logout-btn {
             background-color: #f44336;
         }
@@ -92,10 +89,10 @@
         </div>
 
         <div class="btn-container">
-            <a href="miCloset.jsp" class="btn-verde"><i class="fas fa-tshirt"></i> Mi Closet</a>
+            <a href="miCloset.jsp" class="btn-verde"><i class="fas fa-tshirt"></i>Mi Closet</a>
             <a href="publicaciones.jsp" class="btn-verde"><i class="fas fa-bullhorn"></i> Publicaciones</a>
-            <a href="MensajeServlet" class="btn-verde"><i class="fas fa-comment-dots"></i> Mensajería</a>
-            <a href="perfil.jsp" class="btn-verde"><i class="fas fa-user"></i> Mi Perfil</a>
+            <a href="MensajeServlet" class="btn-verde"><i class="fas fa-comment-dots"></i>Mensajería</a>
+            <a href="perfil.jsp" class="btn-verde"><i class="fas fa-user"></i>Mi Perfil</a>
             <a href="login.jsp" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>
         <!-- Modal -->
@@ -129,13 +126,22 @@
                     li.style.border = '1px solid #ddd';
                     li.style.borderRadius = '5px';
                     li.style.padding = '8px';
+                    li.style.backgroundColor = notif.mensaje.includes("match") ? "#e0ffe0" : "#fff";
 
                     const link = document.createElement('a');
-                    link.href = "publicaciones.jsp?usuario=" + encodeURIComponent(notif.usuarioRemitente);
+                    if (notif.mensaje.includes("match")) {
+                        // Redirige a chat.jsp con el usuario remitente
+                        link.href = "MensajeServlet?usuario=" + encodeURIComponent(notif.usuarioRemitente);
+                    } else {
+                        // Redirige a publicaciones del usuario
+                        link.href = "publicaciones.jsp?usuario=" + encodeURIComponent(notif.usuarioRemitente);
+                    }
+
                     link.style.textDecoration = 'none';
                     link.style.color = '#333';
                     link.textContent = notif.mensaje;
                     link.style.flex = '1';
+                    link.style.fontWeight = notif.mensaje.includes("match") ? "bold" : "normal";
 
                     const eliminarBtn = document.createElement('button');
                     eliminarBtn.textContent = '❌';
@@ -150,6 +156,7 @@
                     li.appendChild(eliminarBtn);
                     lista.appendChild(li);
                 });
+
             });
     }
 
@@ -158,10 +165,10 @@
     }
 
     function eliminarNotificacion(id) {
-        fetch('EliminarNotificacionServlet?id=' + id) // <- método GET, más compatible
+        fetch('EliminarNotificacionServlet?id=' + id)
             .then(response => {
                 if (response.ok) {
-                    abrirModal(); // recargar notificaciones
+                    abrirModal();
                 } else {
                     alert('No se pudo eliminar la notificación.');
                 }
