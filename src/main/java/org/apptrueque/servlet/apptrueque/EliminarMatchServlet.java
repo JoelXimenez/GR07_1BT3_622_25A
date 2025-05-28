@@ -12,20 +12,13 @@ import java.io.IOException;
 
 @WebServlet("/EliminarMatchServlet")
 public class EliminarMatchServlet extends HttpServlet {
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String idMatchStr = request.getParameter("idMatch");
-        if (idMatchStr == null) {
-            response.sendRedirect("perfil.jsp");
-            return;
-        }
-
-        Long idMatch;
-        try {
-            idMatch = Long.parseLong(idMatchStr);
-        } catch (NumberFormatException e) {
+        Long idMatch = parseIdMatch(request);
+        if (idMatch == null) {
             response.sendRedirect("perfil.jsp");
             return;
         }
@@ -37,21 +30,7 @@ public class EliminarMatchServlet extends HttpServlet {
 
             Match match = em.find(Match.class, idMatch);
             if (match != null) {
-                String usuarioA = match.getUsuarioA();
-                String usuarioB = match.getUsuarioB();
-
-                // Eliminar Match
-                em.remove(match);
-
-                // Eliminar Likes correspondientes (bidireccional)
-                Query deleteLikes = em.createQuery(
-                        "DELETE FROM Like l WHERE (l.usuarioEmail = :a AND l.closet.usuario.email = :b) OR (l.usuarioEmail = :b AND l.closet.usuario.email = :a)"
-                );
-                deleteLikes.setParameter("a", usuarioA);
-                deleteLikes.setParameter("b", usuarioB);
-                int likesEliminados = deleteLikes.executeUpdate();
-
-                System.out.println("Likes eliminados relacionados al match: " + likesEliminados);
+                eliminarMatchYLikes(em, match);
             }
 
             em.getTransaction().commit();
@@ -63,5 +42,41 @@ public class EliminarMatchServlet extends HttpServlet {
         }
 
         response.sendRedirect("perfil.jsp");
+    }
+
+    private Long parseIdMatch(HttpServletRequest request) {
+        String idMatchStr = request.getParameter("idMatch");
+        if (idMatchStr == null) return null;
+        try {
+            return Long.parseLong(idMatchStr);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private void eliminarMatchYLikes(EntityManager em, Match match) {
+        String usuarioA = match.getUsuarioA();
+        String usuarioB = match.getUsuarioB();
+
+        em.remove(match);
+
+        int likesEliminados = eliminarLikes(em, usuarioA, usuarioB);
+
+        System.out.println("Likes eliminados relacionados al match: " + likesEliminados);
+    }
+
+    private int eliminarLikes(EntityManager em, String usuarioA, String usuarioB) {
+        Query deleteLikes = em.createQuery(
+                "DELETE FROM Like l WHERE " +
+                        " (l.usuarioEmail = :a AND EXISTS (" +
+                        "   SELECT 1 FROM Closet c WHERE c = l.closet AND c.usuario.email = :b" +
+                        " )) OR " +
+                        " (l.usuarioEmail = :b AND EXISTS (" +
+                        "   SELECT 1 FROM Closet c WHERE c = l.closet AND c.usuario.email = :a" +
+                        " ))"
+        );
+        deleteLikes.setParameter("a", usuarioA);
+        deleteLikes.setParameter("b", usuarioB);
+        return deleteLikes.executeUpdate();
     }
 }

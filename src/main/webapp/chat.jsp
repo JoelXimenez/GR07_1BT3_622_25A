@@ -183,6 +183,17 @@
 
     setInterval(cargarMensajes, 3000);
     window.onload = cargarMensajes;
+    document.querySelector('.chat-input textarea').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+
+            const form = this.closest('form');
+            if (form) {
+                form.submit();
+                this.value = '';
+            }
+        }
+    });
 </script>
 </body>
 </html>
