@@ -4,6 +4,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import jakarta.servlet.ServletException;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.apptrueque.model.Closet;
 import org.apptrueque.util.JpaUtil;
 
@@ -25,6 +26,17 @@ public class DespublicarClosetServlet extends HttpServlet {
             if (closet != null) {
                 closet.setPublicado(false);
                 em.merge(closet);
+
+                String emailUsuario = closet.getUsuario().getEmail();
+
+                // eliminar todos los matches donde participe el usuario
+                Query deleteMatches = em.createQuery(
+                        "DELETE FROM Match m WHERE m.usuarioA = :email OR m.usuarioB = :email"
+                );
+                deleteMatches.setParameter("email", emailUsuario);
+                int matchesEliminados = deleteMatches.executeUpdate();
+
+                System.out.println("Matches eliminados para usuario " + emailUsuario + ": " + matchesEliminados);
             }
             em.getTransaction().commit();
         } catch (Exception e) {
@@ -34,6 +46,6 @@ public class DespublicarClosetServlet extends HttpServlet {
             em.close();
         }
 
-        response.sendRedirect("perfil.jsp"); // ajusta si el nombre es distinto
+        response.sendRedirect("perfil.jsp");
     }
 }
