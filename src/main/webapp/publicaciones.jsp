@@ -216,13 +216,14 @@
             <% } %>
         </ul>
 
-        <form action="LikeServlet" method="post">
+        <form action="LikeServlet" method="post" style="display: inline;">
             <input type="hidden" name="id" value="<%= closet.getIdCloset() %>"/>
-            <button type="submit" class="btn-like" <%= yaDioLike ? "disabled" : "" %>>
+            <button type="submit" class="btn-like">
                 <i class="fas fa-thumbs-up"></i>
-                <%= yaDioLike ? "Ya te gusta" : "Me gusta" %>
+                <%= yaDioLike ? "Quitar Like" : "Me gusta" %>
             </button>
         </form>
+
         <div class="likes-count">
             👍 <%= totalLikes %> personas les gusta esto
         </div>

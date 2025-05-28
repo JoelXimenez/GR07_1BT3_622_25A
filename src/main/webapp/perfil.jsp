@@ -163,7 +163,7 @@
 
     <!-- Botón Ver Matches -->
     <button class="boton editar-btn" style="background-color: #ffc107;" onclick="mostrarModalMatches()">
-        💖 Ver Matches
+        📦👕 Ver Matches
     </button>
 
     <!-- Botón Regresar -->
@@ -241,7 +241,7 @@
     &times;
 </span>
 
-        <h2 style="text-align: center;">💘 Tus Matches</h2>
+        <h2 style="text-align: center;">📦👕 Tus Matches</h2>
         <ul>
             <%
                 EntityManager em4 = JpaUtil.getEntityManagerFactory().createEntityManager();
@@ -261,13 +261,20 @@
                     } catch (Exception e) {}
                     String nombre = (otroUsuario != null) ? otroUsuario.getNombre() : emailOtro;
             %>
-            <li style="margin-bottom: 12px;">
-                <strong>Haz hecho match con:</strong>
-                <a href="MensajeServlet?destinatario=<%= emailOtro %>" style="color: #007bff; text-decoration: none;">
-                    <%= nombre %>
-                </a><br>
-                <small>📅 Fecha: <%= formatoFecha.format(java.sql.Timestamp.valueOf(m.getFechaMatch())) %></small>
+            <li style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>Haz hecho match con:</strong>
+                    <a href="MensajeServlet?destinatario=<%= emailOtro %>" style="color: #007bff; text-decoration: none;">
+                        <%= nombre %>
+                    </a><br>
+                    <small>📅 Fecha: <%= formatoFecha.format(java.sql.Timestamp.valueOf(m.getFechaMatch())) %></small>
+                </div>
+                <form method="post" action="EliminarMatchServlet" style="margin: 0;">
+                    <input type="hidden" name="idMatch" value="<%= m.getId() %>">
+                    <button type="submit" style="background: transparent; border: none; color: #dc3545; font-weight: bold; cursor: pointer;" title="Eliminar match">✖️</button>
+                </form>
             </li>
+
             <%
                     }
                 }
@@ -300,3 +307,4 @@
 
 </body>
 </html>
+
